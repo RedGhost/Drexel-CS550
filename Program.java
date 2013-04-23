@@ -476,14 +476,14 @@ class List extends ValueType {
     }
 
     public String toString(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
-	StringBuilder returnString = new StringBuilder("(");
+	StringBuilder returnString = new StringBuilder("[");
 	for(Expr vt : s.seq)
 	{
 	    returnString.append(vt.eval(nametable, functiontable, var).toString(nametable, functiontable, var));
 	    returnString.append(",");
 	}
 	returnString.deleteCharAt(returnString.length() - 1); // Remove the trailing ','
-	returnString.append(")");
+	returnString.append("]");
 	return returnString.toString();
     }
 
