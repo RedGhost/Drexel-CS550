@@ -43,10 +43,8 @@ non terminal ExpressionList expr_list;
 non terminal Statement statement, assign_statement, if_statement, while_statement, repeat_statement, define_statement, return_statement;
 non terminal Expr expr, term, factor, funcall;
 // Assignment 2 (mwa29)
-non terminal        List list;
-non terminal        Sequence sequence;
-non terminal        Expr listelement;
-
+non terminal List list;
+non terminal Sequence sequence;
 
 program ::= statement_list:list
 	    {: Program program = new Program(list);
@@ -131,7 +129,7 @@ expr_list ::= expr:ex COMMA expr_list:el
             {: RESULT = new ExpressionList(ex);   :};
 
 // Assignment 2 (mwa29)
-list        ::= LBRACKET sequence:seq RBRACKET {: RESULT = new List(seq);   :}
+list        ::= LBRACKET sequence:seq RBRACKET {: Collections.reverse(seq.seq); RESULT = new List(seq);   :}
 	      | LBRACKET RBRACKET              {: RESULT = new List();      :}
               ;
 sequence    ::= expr:e COMMA sequence:seq      {: seq.add(e); RESULT = seq; :}

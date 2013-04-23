@@ -9,9 +9,19 @@ class Expr {
     public Expr() {
     }
 
-    public Integer eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
-        return new Integer(0);
+    public ValueType eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+        return new Number(0);
     }
+}
+
+class ValueType extends Expr{
+    public ValueType() {
+	super();
+    }
+
+    public String toString(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+	return new String("");
+    }    
 }
 
 class Ident extends Expr {
@@ -22,12 +32,20 @@ class Ident extends Expr {
         name = s;
     }
 
-    public Integer eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
-        return new Integer(nametable.get(name).toString());
+    public ValueType eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+ 	ValueType vt = nametable.get(name);
+	if(!Number.numberp(vt))
+	{
+	    return new Number(vt.toString(nametable, functiontable, var));
+	}
+	else
+	{
+	    return vt;
+	}
     }
 }
 
-class Number extends Expr {
+class Number extends ValueType {
 
     private Integer value;
 
@@ -39,8 +57,24 @@ class Number extends Expr {
         value = n;
     }
 
-    public Integer eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
-        return value;
+    public Number(String n) {
+        value = Integer.parseInt(n);
+    }
+
+    public int intValue(){
+	return value.intValue();
+    }
+
+    public String toString(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+	return value.toString();
+    }
+
+    public static boolean numberp(ValueType vt){
+	return (vt instanceof Number);
+    }
+
+    public ValueType eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+        return this;
     }
 }
 
@@ -53,8 +87,18 @@ class Times extends Expr {
         expr2 = op2;
     }
 
-    public Integer eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
-        return new Integer(expr1.eval(nametable, functiontable, var) * expr2.eval(nametable, functiontable, var));
+    public ValueType eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+	// FIXME: need to do type checking for other operators (+,-) and write better exception text
+	ValueType vt1 = expr1.eval(nametable, functiontable, var);
+	ValueType vt2 = expr2.eval(nametable, functiontable, var);
+	if(!Number.numberp(vt1)){
+	    throw new RuntimeException("ERROR");
+	}
+	else if(!Number.numberp(vt2)){
+	    throw new RuntimeException("ERROR");
+	}
+        return new Number(((Number)vt1).intValue() *
+			  ((Number)vt2).intValue());
     }
 }
 
@@ -67,8 +111,9 @@ class Plus extends Expr {
         expr2 = op2;
     }
 
-    public Integer eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
-        return new Integer(expr1.eval(nametable, functiontable, var).intValue() + expr2.eval(nametable, functiontable, var).intValue());
+    public ValueType eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+        return new Number(((Number)expr1.eval(nametable, functiontable, var)).intValue() +
+			  ((Number)expr2.eval(nametable, functiontable, var)).intValue());
     }
 }
 
@@ -81,8 +126,9 @@ class Minus extends Expr {
         expr2 = op2;
     }
 
-    public Integer eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
-        return new Integer(expr1.eval(nametable, functiontable, var) - expr2.eval(nametable, functiontable, var));
+    public ValueType eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+        return new Number(((Number)expr1.eval(nametable, functiontable, var)).intValue() -
+			  ((Number)expr2.eval(nametable, functiontable, var)).intValue());
     }
 }
 
@@ -97,7 +143,7 @@ class FunctionCall extends Expr {
         explist = el;
     }
 
-    public Integer eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+    public ValueType eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
         return functiontable.get(funcid).apply(nametable, functiontable, var, explist);
     }
 }
@@ -107,7 +153,7 @@ abstract class Statement {
     public Statement() {
     }
 
-    public void eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
+    public void eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
     }
 }
 
@@ -124,7 +170,7 @@ class DefineStatement extends Statement {
         proc = process;
     }
 
-    public void eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functable, LinkedList var) {
+    public void eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functable, LinkedList var) {
         // get the named proc object from the function table.
         //System.out.println("Adding Process:"+name+" to Functiontable");
         functable.put(name, proc);
@@ -139,10 +185,10 @@ class ReturnStatement extends Statement {
         expr = e;
     }
 
-    public void eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
+    public void eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
         //Java can't throw exceptions of numbers, so we'll convert it to a string
         //and then on the other end we'll reconvert back to Integer..
-        throw new Exception(Integer.toString(expr.eval(nametable, functiontable, var)));
+        throw new Exception(expr.eval(nametable, functiontable, var).toString(nametable, functiontable, var));
     }
 }
 
@@ -156,7 +202,7 @@ class AssignStatement extends Statement {
         expr = e;
     }
 
-    public void eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+    public void eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
         /* add name to the statementlist of variable names */
         if (!var.contains(name)) {
             var.add(name);
@@ -183,8 +229,12 @@ class IfStatement extends Statement {
         stmtlist1 = list;
     }
 
-    public void eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
-        if (expr.eval(nametable, functiontable, var) > 0) {
+    public void eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
+	ValueType result = expr.eval(nametable, functiontable, var);
+	if(Number.numberp(result)) {
+	    throw new RuntimeException("Expression in if statement does not evaluate to a Number!.");
+	}
+        if (((Number)expr.eval(nametable, functiontable, var)).intValue() > 0) {
             stmtlist1.eval(nametable, functiontable, var);
         } else {
             stmtlist2.eval(nametable, functiontable, var);
@@ -202,8 +252,12 @@ class WhileStatement extends Statement {
         stmtlist = list;
     }
 
-    public void eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
-        while (expr.eval(nametable, functiontable, var) > 0) {
+    public void eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
+	ValueType result = expr.eval(nametable, functiontable, var);
+	if(!Number.numberp(result)) {
+	    throw new RuntimeException("Expression in while statement does not evaluate to a Number!.");
+	}
+        while (((Number)expr.eval(nametable, functiontable, var)).intValue() > 0) {
             stmtlist.eval(nametable, functiontable, var);
         }
     }
@@ -219,10 +273,14 @@ class RepeatStatement extends Statement {
         sl = list;
     }
 
-    public void eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
+    public void eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
+	ValueType result = expr.eval(nametable, functiontable, var);
+	if(!Number.numberp(result)) {
+	    throw new RuntimeException("Expression in if statement does not evaluate to a Number!.");
+	}
         do {
             sl.eval(nametable, functiontable, var);
-        } while (expr.eval(nametable, functiontable, var) > 0);
+        } while (((Number)expr.eval(nametable, functiontable, var)).intValue() > 0);
 
     }
 }
@@ -278,7 +336,7 @@ class StatementList {
         statementlist.add(statement);
     }
 
-    public void eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
+    public void eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) throws Exception {
 
 
         for (Statement stmt : statementlist) {
@@ -307,9 +365,9 @@ class Proc {
         stmtlist = sl;
     }
 
-    public int apply(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var, ExpressionList expressionlist) {
+    public ValueType apply(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var, ExpressionList expressionlist) {
         //System.out.println("Executing Proceedure");
-        HashMap<String, Integer> newnametable = new HashMap<String, Integer>();
+        HashMap<String, ValueType> newnametable = new HashMap<String, ValueType>();
 
         // bind parameters in new name table
         // we need to get the underlying List structure that the ParamList uses...
@@ -336,13 +394,13 @@ class Proc {
         } catch (Exception result) {
             // Note, the result shold contain the proceedure's return value as a String
             //System.out.println("return value = "+result.getMessage());
-            return Integer.parseInt(result.getMessage());
+            return new Number(result.getMessage());
         }
         System.out.println("Error:  no return value");
         System.exit(1);
         // need this or the compiler will complain, but should never
         // reach this...
-        return 0;
+        return null;
     }
 }
 
@@ -354,7 +412,7 @@ class Program {
         stmtlist = list;
     }
 
-    public void eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+    public void eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
         try {
             stmtlist.eval(nametable, functiontable, var);
         } catch (Exception e) {
@@ -362,12 +420,12 @@ class Program {
         }
     }
 
-    public void dump(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+    public void dump(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
         //System.out.println(hm.values());
         System.out.println("Dumping out all the variables...");
         if (nametable != null) {
             for (String name : nametable.keySet()) {
-                System.out.println(name + "=" + nametable.get(name));
+		System.out.println(name + "=" + nametable.get(name).toString(nametable, functiontable, var));
             }
         }
         if (functiontable != null) {
@@ -400,10 +458,11 @@ class Sequence{
     }
 }
 
-class List extends Expr {
+class List extends ValueType {
     private Sequence s;
 
     public List(Sequence seq){
+	
 	s = seq;
     }
 
@@ -411,12 +470,26 @@ class List extends Expr {
 	s = new Sequence();
     }
 
-    public Integer eval(HashMap<String, Integer> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
-	Integer returnInt = 0;
-	for (Expr expr : s.seq) {
-	    returnInt += expr.eval(nametable, functiontable, var);
+    public ValueType eval(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+	return this;
+	//	throw new RuntimeException("Cannot eval a list");
+    }
+
+    public String toString(HashMap<String, ValueType> nametable, HashMap<String, Proc> functiontable, LinkedList var) {
+	StringBuilder returnString = new StringBuilder("(");
+	for(Expr vt : s.seq)
+	{
+	    returnString.append(vt.eval(nametable, functiontable, var).toString(nametable, functiontable, var));
+	    returnString.append(",");
 	}
-        return returnInt;
+	returnString.deleteCharAt(returnString.length() - 1); // Remove the trailing ','
+	returnString.append(")");
+	return returnString.toString();
+    }
+
+    public static boolean listp(ValueType vt)
+    {
+	return (vt instanceof List);
     }
 }
 
