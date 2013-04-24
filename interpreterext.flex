@@ -32,6 +32,13 @@ import java_cup.runtime.Symbol;
 "repeat" {return new Symbol(sym.REPEAT); }
 "until" {return new Symbol(sym.UNTIL); }
 "return" {return new Symbol(sym.RETURN); }
+"cons" {return new Symbol(sym.CONS); }
+"car" {return new Symbol(sym.CAR); }
+"cdr" {return new Symbol(sym.CDR); }
+"nullp" {return new Symbol(sym.NULLP); }
+"intp" {return new Symbol(sym.INTP); }
+"listp" {return new Symbol(sym.LISTP); }
+"||" {return new Symbol(sym.CONCAT); }
 [0-9]+ {return new Symbol(sym.NUMBER, new Integer(yytext())); }
 [a-z,A-Z]+ {return new Symbol(sym.ID, new String(yytext())); }
 [ \t\r\n\f] {/* ignore white space */}

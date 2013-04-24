@@ -30,7 +30,7 @@ parser code {:
 :}
 
 terminal SEMI, PLUS, MINUS, TIMES, ASSIGN, LPAREN, RPAREN, LBRACKET, RBRACKET; // Assignment 2 (mwa29) added LBRACKET,RBRACKET
-terminal IF, THEN, ELSE, FI, WHILE, DO, OD, REPEAT, UNTIL;
+terminal IF, THEN, ELSE, FI, WHILE, DO, OD, REPEAT, UNTIL, CONS, CAR, CDR, NULLP, INTP, LISTP, CONCAT;
 terminal DEFINE, PROC, END,RETURN;
 terminal Integer NUMBER;
 terminal COMMA;
@@ -101,10 +101,22 @@ expr ::= expr:e PLUS term:t
 	 {: RESULT = new Plus(e,t); :}
        | expr:e MINUS term:t
 	 {: RESULT = new Minus(e,t); :}
+	   | CONS LPAREN expr:e COMMA expr:L RPAREN
+	 {: RESULT = new Cons(e,L); :}
+	   | CAR LPAREN expr:e RPAREN
+	 {: RESULT = new Car(e); :}
+	   | CDR LPAREN expr:e RPAREN
+	 {: RESULT = new Cdr(e); :}
+	   | NULLP LPAREN expr:e RPAREN
+	 {: RESULT = new Nullp(e); :}	 
+	   | INTP LPAREN expr:e RPAREN
+	 {: RESULT = new Intp(e); :}
+	   | LISTP LPAREN expr:e RPAREN
+	 {: RESULT = new Listp(e); :}
+	   | expr:list1 CONCAT factor:list2
+	 {: RESULT = new Concat(list1, list2); :}
        | term:t
-	 {: RESULT = t; :}
-       | list:l
-	 {: RESULT = l; :};
+	 {: RESULT = t; :};
 
 term ::= term:t TIMES factor:f
          {: RESULT = new Times(t,f); :}
@@ -115,6 +127,8 @@ factor ::= LPAREN expr:e RPAREN
 	   {: RESULT = e; :}
 	 | NUMBER:n
 	   {: RESULT = new Number(n); :}
+	 | list:l
+	   {: RESULT = l; :}
 	 | ID:i
 	   {: RESULT = new Ident(i); :}
          | funcall:fc
@@ -129,9 +143,9 @@ expr_list ::= expr:ex COMMA expr_list:el
             {: RESULT = new ExpressionList(ex);   :};
 
 // Assignment 2 (mwa29)
-list        ::= LBRACKET sequence:seq RBRACKET {: Collections.reverse(seq.seq); RESULT = new List(seq);   :}
+list        ::= LBRACKET sequence:seq RBRACKET {: RESULT = new List(seq);   :}
 	      | LBRACKET RBRACKET              {: RESULT = new List();      :}
               ;
-sequence    ::= expr:e COMMA sequence:seq      {: seq.add(e); RESULT = seq; :}
+sequence    ::= expr:e COMMA sequence:seq      {: RESULT = new Sequence(seq,e); :}
               | expr:e                         {: RESULT = new Sequence(e); :}
               ;

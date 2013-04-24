@@ -50,7 +50,3 @@ clean :
 	-\rm -v parser.java
 	-\rm -v sym.java
 	-\rm -v Yylex.java*
-	-\rm -v a.out
-	-\rm -v gen2.tab.c
-	-\rm -v gen2.tab.h
-	-\rm -v lex.yy.c
