@@ -29,6 +29,7 @@ parser code {:
 	}
 :}
 
+terminal NOT; // Assignment 2 (mks62) added NOT
 terminal SEMI, PLUS, MINUS, TIMES, ASSIGN, LPAREN, RPAREN, LBRACKET, RBRACKET; // Assignment 2 (mwa29) added LBRACKET,RBRACKET
 terminal IF, THEN, ELSE, FI, WHILE, DO, OD, REPEAT, UNTIL, CONS, CAR, CDR, NULLP, INTP, LISTP, CONCAT;
 terminal DEFINE, PROC, END,RETURN;
@@ -97,7 +98,9 @@ param_list ::= ID:i COMMA param_list:pl
                  | ID:i
                  {: RESULT = new ParamList(i); :};
 
-expr ::= expr:e PLUS term:t
+expr ::= NOT LPAREN expr:e RPAREN
+	 {: RESULT = new Not(e); :}
+       | expr:e PLUS term:t
 	 {: RESULT = new Plus(e,t); :}
        | expr:e MINUS term:t
 	 {: RESULT = new Minus(e,t); :}

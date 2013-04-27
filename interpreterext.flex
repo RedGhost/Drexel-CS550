@@ -23,6 +23,7 @@ import java_cup.runtime.Symbol;
 "if" {return new Symbol(sym.IF); }
 "then" {return new Symbol(sym.THEN); }
 "else" {return new Symbol(sym.ELSE); }
+"not" {return new Symbol(sym.NOT); } // Assignment 2 (mks62)
 "fi" {return new Symbol(sym.FI);}
 "while" {return new Symbol(sym.WHILE); }
 "do" {return new Symbol(sym.DO); }
@@ -40,6 +41,6 @@ import java_cup.runtime.Symbol;
 "listp" {return new Symbol(sym.LISTP); }
 "||" {return new Symbol(sym.CONCAT); }
 [0-9]+ {return new Symbol(sym.NUMBER, new Integer(yytext())); }
-[a-z,A-Z]+ {return new Symbol(sym.ID, new String(yytext())); }
+[a-zA-Z]+ {return new Symbol(sym.ID, new String(yytext())); }
 [ \t\r\n\f] {/* ignore white space */}
 . {System.err.println("Illegal character: "+yytext());}

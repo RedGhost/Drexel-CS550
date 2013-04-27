@@ -101,6 +101,28 @@ class Times extends Expr {
 	}
 }
 
+class Not extends Expr {
+
+	private Expr expr1;
+
+	public Not(Expr op1) {
+		expr1 = op1;
+	}
+
+	public ValueType eval(HashMap<String, ValueType> nametable,
+			HashMap<String, Proc> functiontable, LinkedList var) {
+                
+		int value = ((Number) expr1.eval(nametable, functiontable, var)).intValue();
+                if(value <= 0) {
+                  value = 1;
+                }
+                else {
+                  value = 0;
+                }
+                return new Number(value);
+	}
+}
+
 class Plus extends Expr {
 
 	private Expr expr1, expr2;
@@ -249,7 +271,7 @@ class IfStatement extends Statement {
 			HashMap<String, Proc> functiontable, LinkedList var)
 			throws Exception {
 		ValueType result = expr.eval(nametable, functiontable, var);
-		if (Number.numberp(result)) {
+		if (!Number.numberp(result)) {
 			throw new RuntimeException(
 					"Expression in if statement does not evaluate to a Number!.");
 		}
