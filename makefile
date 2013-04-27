@@ -42,10 +42,10 @@ run-part1 : interpreterext.cup interpreterext.flex Program.java
 	-$(java) -classpath $(CLASSPATH) parser
 
 view-func1 : 
-	-$(pager) input/length_iterative.p
+	-$(pager) length_iterative.p
 
 view-func2 : 
-	-$(pager) input/length_recursive.p
+	-$(pager) length_recursive.p
 
 view-part2 : interpreterextP2.cup interpreterext.flex ProgramP2.java 
 	-$(pager) interpreterextP2.cup
