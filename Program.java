@@ -549,7 +549,9 @@ class List extends ValueType {
 	public String toString(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var) {
 		StringBuilder returnString = new StringBuilder("[");
+		boolean flag = false; //Check if the list is empty
 		for (Expr vt : s.seq) {
+			flag = true;
 			returnString.append(vt.eval(nametable, functiontable, var)
 					.toString(nametable, functiontable, var));
 			returnString.append(",");
@@ -557,6 +559,8 @@ class List extends ValueType {
 		// Remove the trailing ','
 		returnString.deleteCharAt(returnString.length() - 1);
 		returnString.append("]");
+		if (flag == false) //Delete the "]"
+			returnString.deleteCharAt(returnString.length() - 1);
 		return returnString.toString();
 	}
 
@@ -636,8 +640,11 @@ class Car extends Expr {
 	public ValueType eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var) {
 		ValueType list = L.eval(nametable, functiontable, var);
-
-		if (list instanceof List) {
+		//If the list is empty, throw an exception saying so		
+		List temp = (List) list;
+		if(temp.sequence().expressions().size() == 0)
+			throw new RuntimeException("Attempting to Car an empty list");
+		else if (list instanceof List) {
 			return ((List) list).car().eval(nametable, functiontable, var);
 		} else {
 			// Must pass a list to car. Otherwise, error.
@@ -657,12 +664,21 @@ class Cdr extends Expr {
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var) {
+				
 		ValueType list = L.eval(nametable, functiontable, var);
-
-		if (list instanceof List) {
-			return ((List) list).cdr().eval(nametable, functiontable, var);
+		//If there's only one element in the list, return an empty list
+		List temp = (List) list;		
+		if(temp.sequence().expressions().size() == 1)
+			return new List();
+		else if (list instanceof List) {
+			try{ //Check if the list is empty
+				return ((List) list).cdr().eval(nametable, functiontable, var);
+			}
+			catch(Exception e) {
+				throw new RuntimeException("Attempting to Access Null Value");
+			}
 		} else {
-			// Must pass a list to car. Otherwise, error.
+			// Must pass a list to cdr. Otherwise, error.
 			throw new RuntimeException("Invalid value type passed to cdr: "
 					+ list.getClass());
 		}
@@ -680,8 +696,9 @@ class Nullp extends Expr {
 	public ValueType eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var) {
 		ValueType list = L.eval(nametable, functiontable, var);
-
-		if (list == null) {
+		//Check for empty list as well as null
+		List temp = (List) list;
+		if (list == null || temp.sequence().expressions().size() == 0) {
 			return new Number(1);
 		} else if (list instanceof List) {
 			return new Number(0);
@@ -755,3 +772,4 @@ class Concat extends Expr {
 
 	}
 }
+
