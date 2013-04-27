@@ -10,5 +10,5 @@ define Length proc ( list )
   fi
 end;
 
-list := [1,2,3];
+list := [1,2,3,[3,4,5]];
 x := Length ( list )
