@@ -138,7 +138,6 @@ class Memory {
   }
 
   public void deallocateCell(ConsCell cell) {
-    System.out.println("deallocateCell");
     available.add(cell);
   }
 
@@ -153,7 +152,6 @@ class Memory {
     }
   }
   private void mark(Expr expr) {
-      System.out.println("mark");
       if(expr instanceof ConsCell) {
 	  ConsCell cell = (ConsCell)expr;
 	  cell.setMarked(true);
@@ -164,7 +162,6 @@ class Memory {
       }
   }
   private void sweep() {
-      System.out.println("sweep");
       for(ConsCell cell : available) {
 	  if(!cell.getMarked()) {
 	      deallocateCell(cell);
