@@ -1,0 +1,44 @@
+# Group 3
+# assignment 2
+#
+
+### Common File(s) ###
+  README                    - The file you are currently reading.
+  makefile                  - Makefile with view/build/clean commands
+  java-cup-11a.jar          - .jar libraries for cup (included since they're not installed on tux)
+  java-cup-11a-runtime.jar  - .jar libraries for cup (included since they're not installed on tux)
+
+### Part 1 ###
+- view cmd: 'make view-part1'
+- build:    'make buildP1'
+- run cmd:  'make run-part1'
+- details:
+  Based on the provided mini language with addition of lists as a type (in addition to numbers).
+  Added 'built-in' functions: cons(e,L), car(L), cdr(L), nullp(L), intp(e), listp(e), and the concat symble '||'
+  To add the built-in functions, tokens/grammar rules were created for each function. The 'expr' rule
+  was updated for each type of function, e.g. the following is for cons(e,L):
+     	   | CONS LPAREN expr:e COMMA expr:L RPAREN
+	 {: RESULT = new Cons(e,L); :}
+- Source File(s):
+  interpreterext.cup  - cup grammar file
+  interpreterext.flex - jflex scanner file
+  Program.java        - Code file containing class definitions
+- Function files
+  input/length_iterative.p - contains the iterative length function
+  input/length_recursive.p - contains the recursive length function
+
+### Part 2 ###
+- view cmd: 'make view-part2'
+- build:    'make buildP2'
+- run cmd:  'make run-part2'
+- details:
+  The code was updated for dynamic memory allocation and garbage collection.
+- Source File(s):
+  interpreterextP2.cup  - cup grammar file (updated from P1 with memory allocations)
+  interpreterext.flex   - jflex scanner file
+  ProgramP2.java        - Code file containing class definitions (updated from P1 with memory allocations)
+
+### Testing ###
+Testing was done by running against the sample input files.
+For garbage collection, the memory was reduced to a low number to force
+garbage collection to occur.

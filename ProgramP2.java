@@ -53,6 +53,14 @@ class ConsCell extends ValueType {
     return location;
   }
 
+  public void setMarked(boolean marked) {
+    this.marked = marked;
+  }
+
+  public boolean getMarked() {
+    return marked;
+  }
+
   public String toString(HashMap<String, ValueType> nametable,
     HashMap<String, Proc> functiontable, LinkedList var) {
     StringBuilder returnString = new StringBuilder("[");
@@ -93,7 +101,7 @@ class Memory {
   private static Memory memory = new Memory(500);
 
   private ArrayList allCells;
-  private LinkedList available;
+  private LinkedList<ConsCell> available;
 
   public static Memory getInstance() {
     return memory;
@@ -101,7 +109,7 @@ class Memory {
 
   public Memory(int size) {
     allCells = new ArrayList(size);
-    available = new LinkedList();
+    available = new LinkedList<ConsCell>();
     for(int i = 0; i < size; i++) {
       ConsCell cell = new ConsCell(i, new Number(0), -1);
       allCells.add(cell);
@@ -118,18 +126,50 @@ class Memory {
     }
   }
 
-  public ConsCell allocateCell() {
+  public ConsCell allocateCell(HashMap<String, ValueType> nametable) {
     if(available.size() == 0) {
-      // DO GARBAGE COLLECTION
-      return null;
+      garbageCollect(nametable);
     }
-    else {
-      return (ConsCell)available.remove();
+    if(available.size() == 0) {
+	System.out.println("Out of memory!");
+	System.exit(1);	
     }
+    return (ConsCell)available.remove();
   }
 
   public void deallocateCell(ConsCell cell) {
     available.add(cell);
+  }
+
+  public void garbageCollect(HashMap<String, ValueType> nametable) {
+    for (String name : nametable.keySet()) {
+	ValueType currVT = nametable.get(name);
+        if(currVT instanceof ConsCell) {
+	    mark(((ConsCell)currVT).getCar());
+	    mark(Memory.getInstance().cellAt(((ConsCell)currVT).getCdr()));
+	    sweep();
+	}
+    }
+  }
+  private void mark(Expr expr) {
+      if(expr instanceof ConsCell) {
+	  ConsCell cell = (ConsCell)expr;
+	  cell.setMarked(true);
+	  mark(cell.getCar());
+	  if(cell.getCdr() != -1) {
+	     mark(Memory.getInstance().cellAt(cell.getCdr()));
+	  }
+      }
+  }
+  private void sweep() {
+      for(ConsCell cell : available) {
+	  if(!cell.getMarked()) {
+	      deallocateCell(cell);
+	  }
+	  else {
+	      cell.setMarked(false);
+	  }
+      }
   }
 }
 
@@ -575,9 +615,9 @@ class Proc {
 		} catch (Exception result) {
 			// Note, the result shold contain the proceedure's return value as a
 			// String
-			System.out.println();
-			result.printStackTrace();
-			System.out.println();
+			//System.out.println();
+			//result.printStackTrace();
+			//System.out.println();
 			return new Number(result.getMessage());
 		}
 		System.out.println("Error:  no return value");
@@ -746,7 +786,7 @@ class Cons extends Expr {
 		ValueType list = L.eval(nametable, functiontable, var);
 
 		if (list instanceof ConsCell) {
-                        ConsCell cell = Memory.getInstance().allocateCell();
+                        ConsCell cell = Memory.getInstance().allocateCell(nametable);
                         cell.setCar(element);
                         cell.setCdr(((ConsCell)list).getLocation());
                         return cell;

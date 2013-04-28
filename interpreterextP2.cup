@@ -147,8 +147,8 @@ expr_list ::= expr:ex COMMA expr_list:el
 
 // Assignment 2 (mwa29)
 list        ::= LBRACKET sequence:seq RBRACKET {: RESULT = (seq);   :}
-	      | LBRACKET RBRACKET              {: RESULT = Memory.getInstance().allocateCell();      :}
+	      | LBRACKET RBRACKET              {: RESULT = Memory.getInstance().allocateCell(hm);      :}
               ;
-sequence    ::= expr:e COMMA sequence:seq      {: ConsCell cell = Memory.getInstance().allocateCell(); cell.setCar(e); cell.setCdr(((ConsCell)seq).getLocation()); RESULT = cell; :}
-              | expr:e                         {: ConsCell cell = Memory.getInstance().allocateCell(); cell.setCar(e); cell.setCdr(-1); RESULT = cell; :}
+sequence    ::= expr:e COMMA sequence:seq      {: ConsCell cell = Memory.getInstance().allocateCell(hm); cell.setCar(e); cell.setCdr(((ConsCell)seq).getLocation()); RESULT = cell; :}
+              | expr:e                         {: ConsCell cell = Memory.getInstance().allocateCell(hm); cell.setCar(e); cell.setCdr(-1); RESULT = cell; :}
               ;

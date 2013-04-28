@@ -447,9 +447,9 @@ class Proc {
 		} catch (Exception result) {
 			// Note, the result shold contain the proceedure's return value as a
 			// String
-			System.out.println();
-			result.printStackTrace();
-			System.out.println();
+		        //System.out.println();
+			//result.printStackTrace();
+			//System.out.println();
 			return new Number(result.getMessage());
 		}
 		System.out.println("Error:  no return value");

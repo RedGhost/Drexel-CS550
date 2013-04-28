@@ -4,3 +4,8 @@
 *.jar
 *.war
 *.ear
+
+# generated files #
+Yylex.java*
+parser.java
+sym.java
