@@ -31,7 +31,7 @@ buildP1 : interpreterext.cup interpreterext.flex Program.java
 	$(lex) interpreterext.flex
 	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java Program.java
 
-run-part1 : interpreterext.cup interpreterext.flex Program.java
+run-part1 : buildP1
 	-$(java) -classpath $(CLASSPATH) parser
 
 view-func1 : 
@@ -52,7 +52,7 @@ buildP2: interpreterextP2.cup interpreterext.flex ProgramP2.java
 	$(lex) interpreterext.flex
 	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java ProgramP2.java
 
-run-part2 : interpreterextP2.cup interpreterext.flex ProgramP2.java 
+run-part2 : buildP2
 	-$(java) -classpath $(CLASSPATH) parser
 
 ### clean ###

@@ -32,7 +32,8 @@
 - build:    'make buildP2'
 - run cmd:  'make run-part2'
 - details:
-  The code was updated for dynamic memory allocation and garbage collection.
+  The code was updated for dynamic memory allocation and garbage collection. Please note list concatenation
+  alters the original list.
 - Source File(s):
   interpreterextP2.cup  - cup grammar file (updated from P1 with memory allocations)
   interpreterext.flex   - jflex scanner file
