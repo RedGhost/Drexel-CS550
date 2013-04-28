@@ -11,4 +11,4 @@ g := intp(list);
 h := listp(a);
 i := listp(list);
 j := nullp(list);
-k := list || list || list || (cdr(list))
+k := list || cc || ee

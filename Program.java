@@ -5,134 +5,6 @@
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ArrayList;
-
-class ConsCell extends ValueType {
-  private int location;
-  private boolean marked;
-  private boolean list;
-  private Expr car;
-  private int cdr;
-
-  public ConsCell(int location, Expr car, int cdr) {
-    this.location = location;
-    this.car = car;
-    this.cdr = cdr;
-    this.list = false;
-    this.marked = false;
-  }  
-    
-  public void setCar(Expr car) {
-    if(car instanceof ConsCell) {
-      this.list = true;
-      this.car = new Number(((ConsCell)car).getLocation());
-    }
-    else {
-      this.car = car;
-      this.list = false;
-    }
-  }
-
-  public void setCdr(int cdr) {
-    this.cdr = cdr;
-  }
-
-  public int getCdr() {
-    return cdr;
-  }
-
-  public Expr getCar() {
-    return car;
-  }
-
-  public boolean isList() {
-    return list;
-  }
-
-  public int getLocation() {
-    return location;
-  }
-
-  public String toString(HashMap<String, ValueType> nametable,
-    HashMap<String, Proc> functiontable, LinkedList var) {
-    StringBuilder returnString = new StringBuilder("[");
-
-    int nextCell = cdr;
-    ConsCell lastCell = this;
-    if(lastCell.isList()) {
-      ConsCell cell = (ConsCell)Memory.getInstance().cellAt(((Number)car.eval(nametable, functiontable, var)).intValue());
-      returnString.append(cell.eval(nametable, functiontable, var).toString(nametable, functiontable, var));
-    }
-    else {
-      returnString.append(car.eval(nametable, functiontable, var).toString(nametable, functiontable, var));
-    }
-    while(nextCell >= 0) {
-      lastCell = ((ConsCell)Memory.getInstance().cellAt(nextCell));
-      nextCell = lastCell.getCdr();
-      returnString.append(",");
-      if(lastCell.isList()) {
-        ConsCell cell = (ConsCell)Memory.getInstance().cellAt(((Number)lastCell.getCar().eval(nametable, functiontable, var)).intValue());
-        returnString.append(cell.eval(nametable, functiontable, var).toString(nametable, functiontable, var));
-      }
-      else {
-        returnString.append(lastCell.getCar().eval(nametable, functiontable, var).toString(nametable, functiontable, var));
-      }
-    }
-
-    returnString.append("]");
-    return returnString.toString();
-  }
-
-  public ValueType eval(HashMap<String, ValueType> nametable,
-    HashMap<String, Proc> functiontable, LinkedList var) {
-    return this;
-  }
-}
-
-class Memory {
-  private static Memory memory = new Memory(500);
-
-  private ArrayList allCells;
-  private LinkedList available;
-
-  public static Memory getInstance() {
-    return memory;
-  }
-
-  public Memory(int size) {
-    allCells = new ArrayList(size);
-    available = new LinkedList();
-    for(int i = 0; i < size; i++) {
-      ConsCell cell = new ConsCell(i, new Number(0), -1);
-      allCells.add(cell);
-      available.add(cell);
-    }
-  }
-
-  public ConsCell cellAt(int i) {
-    if(i < allCells.size()) {
-      return (ConsCell) allCells.get(i);
-    }
-    else {
-      throw new RuntimeException("Memory location out of bounds error.");
-    }
-  }
-
-  public ConsCell allocateCell() {
-    if(available.size() == 0) {
-      // DO GARBAGE COLLECTION
-      return null;
-    }
-    else {
-      return (ConsCell)available.remove();
-    }
-  }
-
-  public void deallocateCell(ConsCell cell) {
-    available.add(cell);
-  }
-}
-
 
 class Expr {
 
@@ -745,11 +617,9 @@ class Cons extends Expr {
 		ValueType element = e.eval(nametable, functiontable, var);
 		ValueType list = L.eval(nametable, functiontable, var);
 
-		if (list instanceof ConsCell) {
-                        ConsCell cell = Memory.getInstance().allocateCell();
-                        cell.setCar(element);
-                        cell.setCdr(((ConsCell)list).getLocation());
-                        return cell;
+		if (list instanceof List) {
+			List copy = ((List) list).clone();
+			return copy.cons(element).eval(nametable, functiontable, var);
 		} else {
 			// Must pass a list to car. Otherwise, error.
 			throw new RuntimeException("Invalid value type passed to cons: "
@@ -770,17 +640,13 @@ class Car extends Expr {
 	public ValueType eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var) {
 		ValueType list = L.eval(nametable, functiontable, var);
-                if(list instanceof ConsCell) {
-                  Number car = ((Number)((ConsCell)list).getCar());
-                  if(((ConsCell)list).isList()) {
-                    int value = ((Number)car.eval(nametable, functiontable, var)).intValue();
-                    return Memory.getInstance().cellAt(value);
-                  }
-                  else {
-                    return car;
-                  } 
-                }
-          	else {
+		//If the list is empty, throw an exception saying so		
+		List temp = (List) list;
+		if(temp.sequence().expressions().size() == 0)
+			throw new RuntimeException("Attempting to Car an empty list");
+		else if (list instanceof List) {
+			return ((List) list).car().eval(nametable, functiontable, var);
+		} else {
 			// Must pass a list to car. Otherwise, error.
 			throw new RuntimeException("Invalid value type passed to car: "
 					+ list.getClass());
@@ -800,17 +666,18 @@ class Cdr extends Expr {
 			HashMap<String, Proc> functiontable, LinkedList var) {
 				
 		ValueType list = L.eval(nametable, functiontable, var);
-                if(list instanceof ConsCell) {
-                  int cdr = ((ConsCell)list).getCdr();
-                  if(cdr < 0) {
-                    // TODO: probably fix this
-                    return null;
-                  }
-                  else {
-                    return (ConsCell)Memory.getInstance().cellAt(cdr);
-                  } 
-                }
-		else {
+		//If there's only one element in the list, return an empty list
+		List temp = (List) list;		
+		if(temp.sequence().expressions().size() == 1)
+			return new List();
+		else if (list instanceof List) {
+			try{ //Check if the list is empty
+				return ((List) list).cdr().eval(nametable, functiontable, var);
+			}
+			catch(Exception e) {
+				throw new RuntimeException("Attempting to Access Null Value");
+			}
+		} else {
 			// Must pass a list to cdr. Otherwise, error.
 			throw new RuntimeException("Invalid value type passed to cdr: "
 					+ list.getClass());
@@ -829,13 +696,13 @@ class Nullp extends Expr {
 	public ValueType eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var) {
 		ValueType list = L.eval(nametable, functiontable, var);
-                if(list == null) {
-                  return new Number(1);
-                }
-                else if(list instanceof ConsCell) {
-                  return new Number(0);
-                }
-		else {
+		//Check for empty list as well as null
+		List temp = (List) list;
+		if (list == null || temp.sequence().expressions().size() == 0) {
+			return new Number(1);
+		} else if (list instanceof List) {
+			return new Number(0);
+		} else {
 			throw new RuntimeException("Invalid value type passed to nullp: "
 					+ L.eval(nametable, functiontable, var).getClass());
 		}
@@ -870,7 +737,7 @@ class Listp extends Expr {
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var) {
-		if (e.eval(nametable, functiontable, var) instanceof ConsCell) {
+		if (e.eval(nametable, functiontable, var) instanceof List) {
 			return new Number(1);
 		} else {
 			return new Number(0);
@@ -893,15 +760,10 @@ class Concat extends Expr {
 		ValueType list1 = l1.eval(nametable, functiontable, var);
 		ValueType list2 = l2.eval(nametable, functiontable, var);
 
-		if (list1 instanceof ConsCell && list2 instanceof ConsCell) {
-                        int nextCell = ((ConsCell)list1).getCdr();
-                        ConsCell lastCell = (ConsCell)list1;
-                        while(((ConsCell)list1).getCdr() >= 0) {
-                          lastCell = ((ConsCell)Memory.getInstance().cellAt(nextCell));
-                          nextCell = lastCell.getCdr();
-                        }
-                        lastCell.setCar(list2);
-                        return list1;
+		if (list1 instanceof List && list2 instanceof List) {
+			List copy = ((List) list1).clone();
+			copy.concat((List) list2);
+			return copy;
 		} else {
 			// Must pass a list to car. Otherwise, error.
 			throw new RuntimeException("Invalid value type passed to concat: "

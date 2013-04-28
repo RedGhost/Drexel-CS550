@@ -894,13 +894,14 @@ class Concat extends Expr {
 		ValueType list2 = l2.eval(nametable, functiontable, var);
 
 		if (list1 instanceof ConsCell && list2 instanceof ConsCell) {
-                        int nextCell = ((ConsCell)list1).getCdr();
                         ConsCell lastCell = (ConsCell)list1;
-                        while(((ConsCell)list1).getCdr() >= 0) {
+                        int nextCell = lastCell.getCdr();
+                        while (nextCell >= 0) {
+System.out.println("Location at: " + nextCell);
                           lastCell = ((ConsCell)Memory.getInstance().cellAt(nextCell));
                           nextCell = lastCell.getCdr();
                         }
-                        lastCell.setCar(list2);
+                        lastCell.setCdr(((ConsCell)list2).getLocation());
                         return list1;
 		} else {
 			// Must pass a list to car. Otherwise, error.

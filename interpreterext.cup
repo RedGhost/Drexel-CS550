@@ -44,8 +44,8 @@ non terminal ExpressionList expr_list;
 non terminal Statement statement, assign_statement, if_statement, while_statement, repeat_statement, define_statement, return_statement;
 non terminal Expr expr, term, factor, funcall;
 // Assignment 2 (mwa29)
-non terminal ConsCell list;
-non terminal ConsCell sequence;
+non terminal List list;
+non terminal Sequence sequence;
 
 program ::= statement_list:list
 	    {: Program program = new Program(list);
@@ -146,9 +146,9 @@ expr_list ::= expr:ex COMMA expr_list:el
             {: RESULT = new ExpressionList(ex);   :};
 
 // Assignment 2 (mwa29)
-list        ::= LBRACKET sequence:seq RBRACKET {: RESULT = (seq);   :}
-	      | LBRACKET RBRACKET              {: RESULT = Memory.getInstance().allocateCell();      :}
+list        ::= LBRACKET sequence:seq RBRACKET {: RESULT = new List(seq);   :}
+	      | LBRACKET RBRACKET              {: RESULT = new List();      :}
               ;
-sequence    ::= expr:e COMMA sequence:seq      {: ConsCell cell = Memory.getInstance().allocateCell(); cell.setCar(e); cell.setCdr(((ConsCell)seq).getLocation()); RESULT = cell; :}
-              | expr:e                         {: ConsCell cell = Memory.getInstance().allocateCell(); cell.setCar(e); cell.setCdr(-1); RESULT = cell; :}
+sequence    ::= expr:e COMMA sequence:seq      {: RESULT = new Sequence(seq,e); :}
+              | expr:e                         {: RESULT = new Sequence(e); :}
               ;
