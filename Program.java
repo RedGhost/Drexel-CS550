@@ -12,7 +12,8 @@ class Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
 		return new Number(0);
 	}
 }
@@ -23,7 +24,8 @@ class ValueType extends Expr {
 	}
 
 	public String toString(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
 		return new String("");
 	}
 }
@@ -37,7 +39,8 @@ class Ident extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
 		return nametable.get(name);
 	}
 }
@@ -63,7 +66,8 @@ class Number extends ValueType {
 	}
 
 	public String toString(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
 		return value.toString();
 	}
 
@@ -72,7 +76,11 @@ class Number extends ValueType {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+		st.addConstant(value);
+		t.addLoad(value);
+		t.addStore(st.addTemp());
 		return this;
 	}
 }
@@ -87,11 +95,12 @@ class Times extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
 		// FIXME: need to do type checking for other operators (+,-) and write
 		// better exception text
-		ValueType vt1 = expr1.eval(nametable, functiontable, var);
-		ValueType vt2 = expr2.eval(nametable, functiontable, var);
+		ValueType vt1 = expr1.eval(nametable, functiontable, var, st, t);
+		ValueType vt2 = expr2.eval(nametable, functiontable, var, st, t);
 		if (!Number.numberp(vt1)) {
 			throw new RuntimeException("ERROR");
 		} else if (!Number.numberp(vt2)) {
@@ -110,16 +119,17 @@ class Not extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
-                
-		int value = ((Number) expr1.eval(nametable, functiontable, var)).intValue();
-                if(value <= 0) {
-                  value = 1;
-                }
-                else {
-                  value = 0;
-                }
-                return new Number(value);
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+
+		int value = ((Number) expr1.eval(nametable, functiontable, var, st, t))
+				.intValue();
+		if (value <= 0) {
+			value = 1;
+		} else {
+			value = 0;
+		}
+		return new Number(value);
 	}
 }
 
@@ -133,11 +143,18 @@ class Plus extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
-		return new Number(
-				((Number) expr1.eval(nametable, functiontable, var)).intValue()
-						+ ((Number) expr2.eval(nametable, functiontable, var))
-								.intValue());
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+		Number e1 = ((Number) expr1.eval(nametable, functiontable, var, st, t));
+		String e1Tmp = t.getLastTempStore();
+		Number e2 = ((Number) expr2.eval(nametable, functiontable, var, st, t));
+		String e2Tmp = t.getLastTempStore();
+
+		t.addLoad(e1Tmp);
+		t.addAdd(e2Tmp);
+		t.addStore(st.addTemp());
+
+		return new Number(e1.intValue() + e2.intValue());
 	}
 }
 
@@ -151,11 +168,18 @@ class Minus extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
-		return new Number(
-				((Number) expr1.eval(nametable, functiontable, var)).intValue()
-						- ((Number) expr2.eval(nametable, functiontable, var))
-								.intValue());
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+		Number e1 = ((Number) expr1.eval(nametable, functiontable, var, st, t));
+		String e1Tmp = t.getLastTempStore();
+		Number e2 = ((Number) expr2.eval(nametable, functiontable, var, st, t));
+		String e2Tmp = t.getLastTempStore();
+
+		t.addLoad(e1Tmp);
+		t.addSub(e2Tmp);
+		t.addStore(st.addTemp());
+
+		return new Number(e1.intValue() - e2.intValue());
 	}
 }
 
@@ -171,9 +195,10 @@ class FunctionCall extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
 		return functiontable.get(funcid).apply(nametable, functiontable, var,
-				explist);
+				st, t, explist);
 	}
 }
 
@@ -183,8 +208,8 @@ abstract class Statement {
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var)
-			throws Exception {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) throws Exception {
 	}
 }
 
@@ -202,7 +227,8 @@ class DefineStatement extends Statement {
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functable, LinkedList var) {
+			HashMap<String, Proc> functable, LinkedList var, SymbolTable st,
+			Translator t) {
 		// get the named proc object from the function table.
 		// System.out.println("Adding Process:"+name+" to Functiontable");
 		functable.put(name, proc);
@@ -218,13 +244,13 @@ class ReturnStatement extends Statement {
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var)
-			throws Exception {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) throws Exception {
 		// Java can't throw exceptions of numbers, so we'll convert it to a
 		// string
 		// and then on the other end we'll reconvert back to Integer..
-		throw new Exception(expr.eval(nametable, functiontable, var).toString(
-				nametable, functiontable, var));
+		throw new Exception(expr.eval(nametable, functiontable, var, st, t)
+				.toString(nametable, functiontable, var, st, t));
 	}
 }
 
@@ -239,15 +265,21 @@ class AssignStatement extends Statement {
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
 		/* add name to the statementlist of variable names */
 		if (!var.contains(name)) {
 			var.add(name);
 			// insert the variable with the specified name into the table with
-			// the
-			// evaluated result (which must be an integer
+			// the evaluated result (which must be an integer
 		}
-		nametable.put(name, expr.eval(nametable, functiontable, var));
+
+		st.addVariable(name);
+		ValueType vt = expr.eval(nametable, functiontable, var, st, t);
+		// The expressions should be stored to a temp, get that for the load.
+		t.addLoad(t.getLastTempStore());
+		t.addStore(name);
+		nametable.put(name, vt);
 	}
 }
 
@@ -268,17 +300,21 @@ class IfStatement extends Statement {
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var)
-			throws Exception {
-		ValueType result = expr.eval(nametable, functiontable, var);
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) throws Exception {
+		ValueType result = expr.eval(nametable, functiontable, var, st, t);
 		if (!Number.numberp(result)) {
 			throw new RuntimeException(
 					"Expression in if statement does not evaluate to a Number!.");
 		}
-		if (((Number) expr.eval(nametable, functiontable, var)).intValue() > 0) {
-			stmtlist1.eval(nametable, functiontable, var);
+
+		// The expression should be stored to a temp, get that for the load.
+		t.addLoad(t.getLastTempStore());
+
+		if (((Number) result).intValue() > 0) {
+			stmtlist1.eval(nametable, functiontable, var, st, t);
 		} else {
-			stmtlist2.eval(nametable, functiontable, var);
+			stmtlist2.eval(nametable, functiontable, var, st, t);
 		}
 	}
 }
@@ -294,15 +330,16 @@ class WhileStatement extends Statement {
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var)
-			throws Exception {
-		ValueType result = expr.eval(nametable, functiontable, var);
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) throws Exception {
+		ValueType result = expr.eval(nametable, functiontable, var, st, t);
 		if (!Number.numberp(result)) {
 			throw new RuntimeException(
 					"Expression in while statement does not evaluate to a Number!.");
 		}
-		while (((Number) expr.eval(nametable, functiontable, var)).intValue() > 0) {
-			stmtlist.eval(nametable, functiontable, var);
+		while (((Number) expr.eval(nametable, functiontable, var, st, t))
+				.intValue() > 0) {
+			stmtlist.eval(nametable, functiontable, var, st, t);
 		}
 	}
 }
@@ -318,16 +355,17 @@ class RepeatStatement extends Statement {
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var)
-			throws Exception {
-		ValueType result = expr.eval(nametable, functiontable, var);
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) throws Exception {
+		ValueType result = expr.eval(nametable, functiontable, var, st, t);
 		if (!Number.numberp(result)) {
 			throw new RuntimeException(
 					"Expression in if statement does not evaluate to a Number!.");
 		}
 		do {
-			sl.eval(nametable, functiontable, var);
-		} while (((Number) expr.eval(nametable, functiontable, var)).intValue() > 0);
+			sl.eval(nametable, functiontable, var, st, t);
+		} while (((Number) expr.eval(nametable, functiontable, var, st, t))
+				.intValue() > 0);
 
 	}
 }
@@ -384,11 +422,11 @@ class StatementList {
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var)
-			throws Exception {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) throws Exception {
 
 		for (Statement stmt : statementlist) {
-			stmt.eval(nametable, functiontable, var);
+			stmt.eval(nametable, functiontable, var, st, t);
 
 		}
 	}
@@ -415,7 +453,7 @@ class Proc {
 
 	public ValueType apply(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var,
-			ExpressionList expressionlist) {
+			SymbolTable st, Translator t, ExpressionList expressionlist) {
 		// System.out.println("Executing Proceedure");
 		HashMap<String, ValueType> newnametable = new HashMap<String, ValueType>();
 
@@ -434,7 +472,7 @@ class Proc {
 
 			// assign the evaluation of the expression to the parameter name.
 			newnametable.put(p.next(),
-					e.next().eval(nametable, functiontable, var));
+					e.next().eval(nametable, functiontable, var, st, t));
 			// System.out.println("Loading Nametable for procedure with: "+p+" = "+nametable.get(p));
 
 		}
@@ -443,13 +481,13 @@ class Proc {
 		// eval statement list and catch return
 		// System.out.println("Beginning Proceedure Execution..");
 		try {
-			stmtlist.eval(newnametable, functiontable, var);
+			stmtlist.eval(newnametable, functiontable, var, st, t);
 		} catch (Exception result) {
 			// Note, the result shold contain the proceedure's return value as a
 			// String
-		        //System.out.println();
-			//result.printStackTrace();
-			//System.out.println();
+			// System.out.println();
+			// result.printStackTrace();
+			// System.out.println();
 			return new Number(result.getMessage());
 		}
 		System.out.println("Error:  no return value");
@@ -469,9 +507,10 @@ class Program {
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
 		try {
-			stmtlist.eval(nametable, functiontable, var);
+			stmtlist.eval(nametable, functiontable, var, st, t);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
@@ -479,7 +518,8 @@ class Program {
 	}
 
 	public void dump(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var, Translator t,
+			SymbolTable st) {
 		// System.out.println(hm.values());
 		System.out.println("Dumping out all the variables...");
 		if (nametable != null) {
@@ -487,7 +527,7 @@ class Program {
 				System.out.println(name
 						+ "="
 						+ nametable.get(name).toString(nametable,
-								functiontable, var));
+								functiontable, var, st, t));
 			}
 		}
 		if (functiontable != null) {
@@ -495,6 +535,12 @@ class Program {
 				System.out.println("Function: " + name + " defined...");
 			}
 		}
+
+		System.out.println("Dumping out the symbol table...");
+		System.out.println(st);
+
+		System.out.println("Dumping out the translated instructions...");
+		System.out.println(t);
 	}
 }
 
@@ -542,24 +588,26 @@ class List extends ValueType {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
 		return this;
 	}
 
 	public String toString(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
 		StringBuilder returnString = new StringBuilder("[");
-		boolean flag = false; //Check if the list is empty
+		boolean flag = false; // Check if the list is empty
 		for (Expr vt : s.seq) {
 			flag = true;
-			returnString.append(vt.eval(nametable, functiontable, var)
-					.toString(nametable, functiontable, var));
+			returnString.append(vt.eval(nametable, functiontable, var, st, t)
+					.toString(nametable, functiontable, var, st, t));
 			returnString.append(",");
 		}
 		// Remove the trailing ','
 		returnString.deleteCharAt(returnString.length() - 1);
 		returnString.append("]");
-		if (flag == false) //Delete the "]"
+		if (flag == false) // Delete the "]"
 			returnString.deleteCharAt(returnString.length() - 1);
 		return returnString.toString();
 	}
@@ -613,13 +661,15 @@ class Cons extends Expr {
 	// function that are not surrounded by parentheses. (i.e. y :=
 	// cons(x,[1,2]) fails to parse but y := cons((x),[1,2]) works)
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
-		ValueType element = e.eval(nametable, functiontable, var);
-		ValueType list = L.eval(nametable, functiontable, var);
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+		ValueType element = e.eval(nametable, functiontable, var, st, t);
+		ValueType list = L.eval(nametable, functiontable, var, st, t);
 
 		if (list instanceof List) {
 			List copy = ((List) list).clone();
-			return copy.cons(element).eval(nametable, functiontable, var);
+			return copy.cons(element)
+					.eval(nametable, functiontable, var, st, t);
 		} else {
 			// Must pass a list to car. Otherwise, error.
 			throw new RuntimeException("Invalid value type passed to cons: "
@@ -638,14 +688,16 @@ class Car extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
-		ValueType list = L.eval(nametable, functiontable, var);
-		//If the list is empty, throw an exception saying so		
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+		ValueType list = L.eval(nametable, functiontable, var, st, t);
+		// If the list is empty, throw an exception saying so
 		List temp = (List) list;
-		if(temp.sequence().expressions().size() == 0)
+		if (temp.sequence().expressions().size() == 0)
 			throw new RuntimeException("Attempting to Car an empty list");
 		else if (list instanceof List) {
-			return ((List) list).car().eval(nametable, functiontable, var);
+			return ((List) list).car().eval(nametable, functiontable, var, st,
+					t);
 		} else {
 			// Must pass a list to car. Otherwise, error.
 			throw new RuntimeException("Invalid value type passed to car: "
@@ -663,18 +715,19 @@ class Cdr extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
-				
-		ValueType list = L.eval(nametable, functiontable, var);
-		//If there's only one element in the list, return an empty list
-		List temp = (List) list;		
-		if(temp.sequence().expressions().size() == 1)
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+
+		ValueType list = L.eval(nametable, functiontable, var, st, t);
+		// If there's only one element in the list, return an empty list
+		List temp = (List) list;
+		if (temp.sequence().expressions().size() == 1)
 			return new List();
 		else if (list instanceof List) {
-			try{ //Check if the list is empty
-				return ((List) list).cdr().eval(nametable, functiontable, var);
-			}
-			catch(Exception e) {
+			try { // Check if the list is empty
+				return ((List) list).cdr().eval(nametable, functiontable, var,
+						st, t);
+			} catch (Exception e) {
 				throw new RuntimeException("Attempting to Access Null Value");
 			}
 		} else {
@@ -694,9 +747,10 @@ class Nullp extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
-		ValueType list = L.eval(nametable, functiontable, var);
-		//Check for empty list as well as null
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+		ValueType list = L.eval(nametable, functiontable, var, st, t);
+		// Check for empty list as well as null
 		List temp = (List) list;
 		if (list == null || temp.sequence().expressions().size() == 0) {
 			return new Number(1);
@@ -704,7 +758,7 @@ class Nullp extends Expr {
 			return new Number(0);
 		} else {
 			throw new RuntimeException("Invalid value type passed to nullp: "
-					+ L.eval(nametable, functiontable, var).getClass());
+					+ L.eval(nametable, functiontable, var, st, t).getClass());
 		}
 	}
 }
@@ -718,8 +772,9 @@ class Intp extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
-		if (e.eval(nametable, functiontable, var) instanceof Number) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+		if (e.eval(nametable, functiontable, var, st, t) instanceof Number) {
 			return new Number(1);
 		} else {
 			return new Number(0);
@@ -736,8 +791,9 @@ class Listp extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
-		if (e.eval(nametable, functiontable, var) instanceof List) {
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+		if (e.eval(nametable, functiontable, var, st, t) instanceof List) {
 			return new Number(1);
 		} else {
 			return new Number(0);
@@ -756,9 +812,10 @@ class Concat extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var) {
-		ValueType list1 = l1.eval(nametable, functiontable, var);
-		ValueType list2 = l2.eval(nametable, functiontable, var);
+			HashMap<String, Proc> functiontable, LinkedList var,
+			SymbolTable st, Translator t) {
+		ValueType list1 = l1.eval(nametable, functiontable, var, st, t);
+		ValueType list2 = l2.eval(nametable, functiontable, var, st, t);
 
 		if (list1 instanceof List && list2 instanceof List) {
 			List copy = ((List) list1).clone();
@@ -772,4 +829,3 @@ class Concat extends Expr {
 
 	}
 }
-

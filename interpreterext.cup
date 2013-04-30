@@ -17,8 +17,13 @@ action code {:
 	/* var stores the used variable names, this is not necessary
 	 * but helpful to dump all the values at the end */
 	public LinkedList var = new LinkedList();
-        /* ft is used to store and retrieve the functions */
-        public HashMap ft = new HashMap();
+    /* ft is used to store and retrieve the functions */
+    public HashMap ft = new HashMap();
+    
+    /* Added for assignment 3 */
+    public SymbolTable st = new SymbolTable();
+    public Translator t = new Translator();
+    
 :}
 
 parser code {:
@@ -49,8 +54,8 @@ non terminal Sequence sequence;
 
 program ::= statement_list:list
 	    {: Program program = new Program(list);
-	       program.eval(hm, ft, var);
-	       program.dump(hm, ft, var);
+	       program.eval(hm, ft, var, st, t);
+	       program.dump(hm, ft, var, t, st);
 	     :};
 
 statement_list ::= statement:s
@@ -73,12 +78,10 @@ statement ::= assign_statement:a
               {: RESULT = r; :};
 
 assign_statement ::= ID:i ASSIGN expr:e
-		     {: RESULT = new AssignStatement(i,e); 
-		     :};
+		     {: RESULT = new AssignStatement(i,e); :};
 
 define_statement ::= DEFINE ID:i PROC LPAREN param_list:pl RPAREN statement_list:sl END
-                     {: RESULT = new DefineStatement(i,new Proc(pl,sl));
-                     :};
+                     {: RESULT = new DefineStatement(i,new Proc(pl,sl)); :};
 
 if_statement ::= IF expr:e THEN statement_list:s1 ELSE statement_list:s2 FI
 		 {: RESULT = new IfStatement(e,s1,s2); :};
@@ -134,8 +137,8 @@ factor ::= LPAREN expr:e RPAREN
 	   {: RESULT = l; :}
 	 | ID:i
 	   {: RESULT = new Ident(i); :}
-         | funcall:fc
-           {: RESULT = fc; :};
+     | funcall:fc
+       {: RESULT = fc; :};
 
 funcall ::= ID:i LPAREN expr_list:el RPAREN
             {: RESULT = new FunctionCall(i,el); :};
