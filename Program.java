@@ -41,6 +41,8 @@ class Ident extends Expr {
 	public ValueType eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var,
 			SymbolTable st, Translator t) {
+		t.addLoad(name);
+		t.addStore(st.addTemp());
 		return nametable.get(name);
 	}
 }
@@ -310,12 +312,26 @@ class IfStatement extends Statement {
 
 		// The expression should be stored to a temp, get that for the load.
 		t.addLoad(t.getLastTempStore());
+		int firstJump = t.addNewInstructionSet();
+		t.addJumpNegative(firstJump);
+		t.addJumpZero(firstJump);
 
-		if (((Number) result).intValue() > 0) {
-			stmtlist1.eval(nametable, functiontable, var, st, t);
-		} else {
-			stmtlist2.eval(nametable, functiontable, var, st, t);
-		}
+		stmtlist1.eval(nametable, functiontable, var, st, t);
+
+		int secondJump = t.addNewInstructionSet();
+
+		t.addJump(secondJump);
+		t.setCurrentLabel(firstJump);
+
+		stmtlist2.eval(nametable, functiontable, var, st, t);
+
+		t.setCurrentLabel(secondJump);
+
+		// if (((Number) result).intValue() > 0) {
+		// stmtlist1.eval(nametable, functiontable, var, st, t);
+		// } else {
+		// stmtlist2.eval(nametable, functiontable, var, st, t);
+		// }
 	}
 }
 
@@ -332,15 +348,33 @@ class WhileStatement extends Statement {
 	public void eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var,
 			SymbolTable st, Translator t) throws Exception {
+		int firstJump = t.addNewInstructionSet();
+		t.setCurrentLabel(firstJump);
+
 		ValueType result = expr.eval(nametable, functiontable, var, st, t);
+
 		if (!Number.numberp(result)) {
 			throw new RuntimeException(
 					"Expression in while statement does not evaluate to a Number!.");
 		}
-		while (((Number) expr.eval(nametable, functiontable, var, st, t))
-				.intValue() > 0) {
-			stmtlist.eval(nametable, functiontable, var, st, t);
-		}
+
+		// The expression should be stored to a temp, get that for the load.
+		t.addLoad(t.getLastTempStore());
+
+		int secondJump = t.addNewInstructionSet();
+
+		t.addJumpNegative(secondJump);
+		t.addJumpZero(secondJump);
+
+		stmtlist.eval(nametable, functiontable, var, st, t);
+
+		t.addJump();
+		t.setCurrentLabel(secondJump);
+
+		// while (((Number) expr.eval(nametable, functiontable, var, st, t))
+		// .intValue() > 0) {
+		// stmtlist.eval(nametable, functiontable, var, st, t);
+		// }
 	}
 }
 
@@ -511,6 +545,7 @@ class Program {
 			SymbolTable st, Translator t) {
 		try {
 			stmtlist.eval(nametable, functiontable, var, st, t);
+			t.addHalt();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
@@ -521,20 +556,20 @@ class Program {
 			HashMap<String, Proc> functiontable, LinkedList var, Translator t,
 			SymbolTable st) {
 		// System.out.println(hm.values());
-		System.out.println("Dumping out all the variables...");
-		if (nametable != null) {
-			for (String name : nametable.keySet()) {
-				System.out.println(name
-						+ "="
-						+ nametable.get(name).toString(nametable,
-								functiontable, var, st, t));
-			}
-		}
-		if (functiontable != null) {
-			for (String name : functiontable.keySet()) {
-				System.out.println("Function: " + name + " defined...");
-			}
-		}
+		// System.out.println("Dumping out all the variables...");
+		// if (nametable != null) {
+		// for (String name : nametable.keySet()) {
+		// System.out.println(name
+		// + "="
+		// + nametable.get(name).toString(nametable,
+		// functiontable, var, st, t));
+		// }
+		// }
+		// if (functiontable != null) {
+		// for (String name : functiontable.keySet()) {
+		// System.out.println("Function: " + name + " defined...");
+		// }
+		// }
 
 		System.out.println("Dumping out the symbol table...");
 		System.out.println(st);

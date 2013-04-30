@@ -16,7 +16,6 @@ public class SymbolTable {
 		if (symbols.get("C" + c.toString()) == null) {
 			symbols.put("C" + c.toString(), new Symbol(c, Symbol.CONSTANT,
 					Symbol.UNDEFINED));
-			System.out.println("add constant");
 			numConsts++;
 		}
 	}

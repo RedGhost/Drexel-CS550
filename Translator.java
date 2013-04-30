@@ -1,4 +1,3 @@
-import java.util.Comparator;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -7,21 +6,12 @@ public class Translator {
 	 * Used for conditional and while statements. Maps a name (e.g. "L1") to a
 	 * set of instructions. The first set of instructions is known as "L0".
 	 */
-	private TreeMap<String, Vector<String>> instructions;
-	private String currentLabel;
+	private TreeMap<Integer, Vector<String>> instructions;
+	private int currentLabel;
 
 	public Translator() {
-		instructions = new TreeMap<String, Vector<String>>(
-				new Comparator<String>() {
-					@Override
-					public int compare(String o1, String o2) {
-						// Compare the number after the 'L'.
-						return new Integer(Integer.parseInt(o1.substring(1)))
-								.compareTo(new Integer(Integer.parseInt(o2
-										.substring(1))));
-					}
-				});
-		currentLabel = "L0";
+		instructions = new TreeMap<Integer, Vector<String>>();
+		currentLabel = 0;
 		instructions.put(currentLabel, new Vector<String>());
 	}
 
@@ -91,16 +81,54 @@ public class Translator {
 		return null;
 	}
 
+	/**
+	 * Add a new chunk of instructions to the translator. Caused by a if or
+	 * while statement.
+	 * 
+	 * @return The number (e.g. 1 if "L1") of the new set of instructions added.
+	 */
+	public int addNewInstructionSet() {
+		int newSet = instructions.size();
+		instructions.put(newSet, new Vector<String>());
+		return newSet;
+	}
+
+	public void addJumpNegative(int newL) {
+		instructions.get(currentLabel).add("JMN L" + newL);
+	}
+
+	public void addJumpZero(int newL) {
+		instructions.get(currentLabel).add("JMZ L" + newL);
+	}
+
+	public void addJump(int newL) {
+		instructions.get(currentLabel).add("JMP L" + newL);
+	}
+
+	public void addJump() {
+		instructions.get(currentLabel).add("JMP L" + currentLabel);
+	}
+
+	public void setCurrentLabel(int newLabel) {
+		currentLabel = newLabel;
+	}
+
+	public void addHalt() {
+		instructions.get(currentLabel).add("HLT");
+	}
+
 	@Override
 	public String toString() {
+		System.out.println("instructions.size: " + instructions.size());
+
 		StringBuilder b = new StringBuilder();
 
 		b.append("Translated Instructions:\n");
 		for (int l = 0; l < instructions.size(); l++) {
 			if (l != 0) {
-				System.out.println("L" + l);
+				b.append("L" + l);
 			}
-			for (String i : instructions.get("L" + l)) {
+			for (String i : instructions.get(l)) {
 				b.append((l != 0 ? "\t" : "") + i + "\n");
 			}
 		}
