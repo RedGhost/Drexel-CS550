@@ -1,5 +1,5 @@
 # Project Group 3
-# assignment 2
+# assignment 3
 #
 
 javac=javac
@@ -10,52 +10,43 @@ CLASSPATH=./:$(cup_location):$(cup_runtime)
 lex=jflex
 pager=less
 
-.PHONY : view-part1 buildP1 run-part1 view-func1 view-func2 view-part2 buildP2 run-part2 clean
-# view-part1 — display (using the more utility) all source code for part 1
-# buildP1 — target to build your parser for part 1
-# run-part1 — run your parser from part 1
-# view-func1 — display (using the more utility) your iterative length function in the mini language
-# view-func2 — display (using the more utility) your recursive length function in the mini language
-# view-part2 — display (using the more utility) all source code for part 2
-# buildP2 - target to build your parser for part 2
-# run-part2 — run your parser from part 2
-# clean — cleans up all intermediate and resulting files
+.PHONY : view compile view-trans view-link view-op run run-op clean
+# view — display (using the more utility) all of your source code (excluding the modified RAM)
+# compile — Does whatever you need to do to produce:
+#    symbolic RAL code
+#    linked RAL code
+#    (optional) – You optimised RAL code
 
-view-part1 : interpreterext.cup interpreterext.flex Program.java
+# You can name the the files as you wish. Your interpreter will read stdin, as previously.
+# view-trans — Use cat to display your symbolic RAL program (produced in translate) to stdout.
+# view-link — Use cat to display your compiled (not optimised) RAL program (produced in translate to stdout.
+# view-op — Use cat to display your compiled, optimised RAL program (produced in translate to stdout. If you didn't provide optimisation, echo "NOT IMPLEMENTED"
+# run — invoke ~jjohnson/bin/ram to run your program. Let output go to stdout.
+# run-op — invoke ~jjohnson/bin/ram to run your optimised program. If you didn't provide optimisation, echo "NOT IMPLEMENTED"
+# clean — remove all binaries and intermediate files
+
+view : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Translator.java
 	-$(pager) interpreterext.cup
 	-$(pager) interpreterext.flex
 	-$(pager) Program.java
+	-$(pager) SymbolTable.java
+	-$(pager) Translator.java
 
-buildP1 : interpreterext.cup interpreterext.flex Program.java
+compile : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Translator.java
 	$(java) -classpath $(CLASSPATH) java_cup.Main interpreterext.cup
 	$(lex) interpreterext.flex
-	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java Program.java
+	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java Program.java SymbolTable.java Translator.java
+	$(java) -classpath $(CLASSPATH) parser
 
-run-part1 : buildP1
-	-$(java) -classpath $(CLASSPATH) parser
+view-trans :
 
-view-func1 : 
-	-$(pager) input/length_iterative.p
+view-link :
 
-view-func2 : 
-	-$(pager) input/length_recursive.p
+view-op :
 
-# Part 2
+run :
 
-view-part2 : interpreterextP2.cup interpreterext.flex ProgramP2.java 
-	-$(pager) interpreterextP2.cup
-	-$(pager) interpreterext.flex
-	-$(pager) ProgramP2.java
-
-buildP2: interpreterextP2.cup interpreterext.flex ProgramP2.java
-	$(java) -classpath $(CLASSPATH) java_cup.Main interpreterextP2.cup
-	$(lex) interpreterext.flex
-	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java ProgramP2.java
-
-run-part2 : buildP2
-	-$(java) -classpath $(CLASSPATH) parser
-
-### clean ###
+run-op:
 
 clean :
 	-\rm -v *.class
