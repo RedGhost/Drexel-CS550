@@ -9,7 +9,29 @@ public class SymbolTable {
 	private int numTemps = 0;
 
 	public SymbolTable() {
-		symbols = new HashMap<String, SymbolTable.Symbol>();
+		symbols = new HashMap<String, Symbol>();
+	}
+
+        public HashMap<String, Symbol> getSymbols(){
+	    return symbols;
+        }
+
+        public Symbol getSymbol(String name){
+	    if(symbols.containsKey(name)) {
+		return symbols.get(name);
+	    }
+	    else{
+		return null;
+	    }
+        }
+
+        public String getName(Symbol symbol){
+	    for(String name : symbols.keySet()){
+		if(symbols.get(name).equals(symbol)){
+		    return name;
+		}
+	    }
+	    return null;
 	}
 
 	public void addConstant(Integer c) {
@@ -41,57 +63,52 @@ public class SymbolTable {
 		return tempName;
 	}
 
+        public Symbol addLabel(int label) {
+	    if (symbols.get("L" + label) == null) {
+		Symbol labelSymbol = new Symbol(label, Symbol.LABEL, Symbol.UNDEFINED);
+		symbols.put("L" + label, labelSymbol);
+		return labelSymbol;
+	    }
+	    else{
+		return symbols.get("L" + label);
+	    }
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append("Symbol Table:\n");
 		b.append("Num Constants: " + numConsts + ", Num Vars: " + numVars
-				+ ", Num Temps: " + numConsts + "\n");
+				+ ", Num Temps: " + numTemps + "\n");
 		b.append(symbols);
 		return b.toString();
 	}
 
-	private class Symbol {
-		public static final int UNDEFINED = -1;
-		public static final int CONSTANT = 0;
-		public static final int VARIABLE = 1;
-		public static final int TEMP = 2;
+        public void link(){
+	    int currAddr = 1;
 
-		private int value;
-		private int type;
-		private int addr;
-
-		public Symbol(int value, int type, int addr) {
-			this.value = value;
-			this.type = type;
-			this.addr = addr;
+	    // Constants
+	    int currKeyNum = 0;
+	    int index = 0;
+	    while(index < numConsts){
+		String key = "C"+currKeyNum;
+		if(symbols.containsKey(key)){
+		    symbols.get(key).setAddr(currAddr++);
+		    index++;
 		}
+		currKeyNum++;
+	    }
 
-		public int getValue() {
-			return value;
+	    // Variables
+	    for(String key : symbols.keySet()){
+		if(symbols.get(key).getType() == Symbol.VARIABLE){
+		    symbols.get(key).setAddr(currAddr++); 
 		}
+	    }
 
-		public int getType() {
-			return type;
-		}
-
-		public int getAddr() {
-			return addr;
-		}
-
-		@Override
-		public String toString() {
-			StringBuilder b = new StringBuilder();
-			b.append("[" + value + ", ");
-			if (type == CONSTANT) {
-				b.append("const, ");
-			} else if (type == VARIABLE) {
-				b.append("var, ");
-			} else if (type == TEMP) {
-				b.append("temp, ");
-			}
-			b.append(addr + "]");
-			return b.toString();
-		}
-	}
+	    // Temps
+	    for(int i = 0; i < numTemps; i++){
+		symbols.get("T"+i).setAddr(currAddr++);
+	    }
+        }
 }

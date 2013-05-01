@@ -1,7 +1,3 @@
-# Project Group 3
-# assignment 3
-#
-
 javac=javac
 java=java
 cup_location=java-cup-11a.jar
@@ -25,17 +21,18 @@ pager=less
 # run-op — invoke ~jjohnson/bin/ram to run your optimised program. If you didn't provide optimisation, echo "NOT IMPLEMENTED"
 # clean — remove all binaries and intermediate files
 
-view : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Translator.java
+view : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Translator.java Symbol.java
 	-$(pager) interpreterext.cup
 	-$(pager) interpreterext.flex
 	-$(pager) Program.java
 	-$(pager) SymbolTable.java
 	-$(pager) Translator.java
+	-$(pager) Symbol.java
 
-compile : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Translator.java
+compile : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Translator.java Symbol.java
 	$(java) -classpath $(CLASSPATH) java_cup.Main interpreterext.cup
 	$(lex) interpreterext.flex
-	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java Program.java SymbolTable.java Translator.java
+	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java Program.java SymbolTable.java Translator.java Symbol.java
 	$(java) -classpath $(CLASSPATH) parser
 
 view-trans :

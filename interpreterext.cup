@@ -1,10 +1,3 @@
-/* this is the cup file for the mini language
- * for CS550, Assignment 2
- * Modified by Mike Kopack for CS550, 2009 Spring Qtr.
- * Should be at the same level of completeness as the Lecture 2c
- * C++ version.
- */
-
 import java_cup.runtime.*;
 import java.util.*;
 
@@ -55,7 +48,9 @@ non terminal Sequence sequence;
 program ::= statement_list:list
 	    {: Program program = new Program(list);
 	       program.eval(hm, ft, var, st, t);
-	       program.dump(hm, ft, var, t, st);
+               st.link();
+               t.link(st);
+	       program.dump(hm, ft, var, st, t);
 	     :};
 
 statement_list ::= statement:s

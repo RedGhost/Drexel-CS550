@@ -6,14 +6,32 @@ public class Translator {
 	 * Used for conditional and while statements. Maps a name (e.g. "L1") to a
 	 * set of instructions. The first set of instructions is known as "L0".
 	 */
-	private TreeMap<Integer, Vector<String>> instructions;
+	private TreeMap<Integer, Vector<Instruction>> instructions;
 	private int currentLabel;
 
 	public Translator() {
-		instructions = new TreeMap<Integer, Vector<String>>();
+		instructions = new TreeMap<Integer, Vector<Instruction>>();
 		currentLabel = 0;
-		instructions.put(currentLabel, new Vector<String>());
+		instructions.put(currentLabel, new Vector<Instruction>());
 	}
+
+	/**
+	 * Linking function: updates address of labels in SymbolTable.
+	 * 
+	 * @param st
+	 *            - SymbolTable to update.
+	 */
+        public void link(SymbolTable st) {
+	    int addr = 1;
+	    for (int l = 0; l < instructions.size(); l++) {
+		System.out.println(addr);
+		Symbol labelSymbol = st.getSymbol("L" + l);
+		if(labelSymbol != null){
+		    labelSymbol.setAddr(addr);
+		}
+		addr += instructions.get(l).size();
+	    }	    
+        }
 
 	/**
 	 * Add a load instruction for a constant.
@@ -21,8 +39,8 @@ public class Translator {
 	 * @param n
 	 *            - Constant to load.
 	 */
-	public void addLoad(Integer n) {
-		instructions.get(currentLabel).add("LD C" + n);
+	public void addLoad(Integer n, SymbolTable st) {
+	    instructions.get(currentLabel).add(new Instruction("LD", st.getSymbol("C" + n)));
 	}
 
 	/**
@@ -31,8 +49,8 @@ public class Translator {
 	 * @param n
 	 *            - Constant to load.
 	 */
-	public void addLoad(String n) {
-		instructions.get(currentLabel).add("LD " + n);
+	public void addLoad(String n, SymbolTable st) {
+		instructions.get(currentLabel).add(new Instruction("LD", st.getSymbol(n)));
 	}
 
 	/**
@@ -41,8 +59,8 @@ public class Translator {
 	 * @param t
 	 *            - Name of the temp variable to store into.
 	 */
-	public void addStore(String t) {
-		instructions.get(currentLabel).add("ST " + t);
+	public void addStore(String t, SymbolTable st) {
+	    instructions.get(currentLabel).add(new Instruction("ST", st.getSymbol(t)));
 	}
 
 	/**
@@ -51,9 +69,8 @@ public class Translator {
 	 * @param e2Tmp
 	 *            - Name of the temp variable to add.
 	 */
-	public void addAdd(String e2Tmp) {
-		instructions.get(currentLabel).add("ADD " + e2Tmp);
-
+	public void addAdd(String e2Tmp, SymbolTable st) {
+	    instructions.get(currentLabel).add(new Instruction("ADD", st.getSymbol(e2Tmp)));
 	}
 
 	/**
@@ -62,20 +79,18 @@ public class Translator {
 	 * @param e2Tmp
 	 *            - Name of the temp variable to subtract.
 	 */
-	public void addSub(String e2Tmp) {
-		instructions.get(currentLabel).add("SUB " + e2Tmp);
-
+	public void addSub(String e2Tmp, SymbolTable st) {
+	    instructions.get(currentLabel).add(new Instruction("SUB", st.getSymbol(e2Tmp)));
 	}
 
 	/**
 	 * @return The last temporary variable that was stored to.
 	 */
-	public String getLastTempStore() {
+	public String getLastTempStore(SymbolTable st) {
 		for (int i = instructions.get(currentLabel).size() - 1; i >= 0; i--) {
-			if (instructions.get(currentLabel).get(i).startsWith("ST ")) {
-				String[] pieces = instructions.get(currentLabel).get(i)
-						.split(" ");
-				return pieces[1];
+		    if (instructions.get(currentLabel).get(i).getOperator().equals("ST") &&
+			instructions.get(currentLabel).get(i).getSymbol().getType() == Symbol.TEMP) {
+			return st.getName(instructions.get(currentLabel).get(i).getSymbol());
 			}
 		}
 		return null;
@@ -89,50 +104,96 @@ public class Translator {
 	 */
 	public int addNewInstructionSet() {
 		int newSet = instructions.size();
-		instructions.put(newSet, new Vector<String>());
+		instructions.put(newSet, new Vector<Instruction>());
 		return newSet;
 	}
 
-	public void addJumpNegative(int newL) {
-		instructions.get(currentLabel).add("JMN L" + newL);
+	public void addJumpNegative(int newL, SymbolTable st) {
+	    instructions.get(currentLabel).add(new Instruction("JMN", st.addLabel(newL)));
 	}
 
-	public void addJumpZero(int newL) {
-		instructions.get(currentLabel).add("JMZ L" + newL);
+	public void addJumpZero(int newL, SymbolTable st) {
+	    instructions.get(currentLabel).add(new Instruction("JMZ", st.addLabel(newL)));
 	}
 
-	public void addJump(int newL) {
-		instructions.get(currentLabel).add("JMP L" + newL);
+	public void addJump(int newL, SymbolTable st) {
+	    instructions.get(currentLabel).add(new Instruction("JMP", st.addLabel(newL)));
 	}
 
-	public void addJump() {
-		instructions.get(currentLabel).add("JMP L" + currentLabel);
+	public void addJump(SymbolTable st) {
+	    instructions.get(currentLabel).add(new Instruction("JMP", st.addLabel(currentLabel)));
 	}
 
 	public void setCurrentLabel(int newLabel) {
 		currentLabel = newLabel;
 	}
 
-	public void addHalt() {
-		instructions.get(currentLabel).add("HLT");
+	public void addHalt(SymbolTable st) {
+	    instructions.get(currentLabel).add(new Instruction("HLT", null));
 	}
 
-	@Override
-	public String toString() {
+	public String toString(SymbolTable st) {
 		System.out.println("instructions.size: " + instructions.size());
 
 		StringBuilder b = new StringBuilder();
 
 		b.append("Translated Instructions:\n");
 		for (int l = 0; l < instructions.size(); l++) {
-			if (l != 0) {
-				b.append("L" + l);
+		    if (l != 0) {
+			b.append("L" + l);
+		    }
+		    for (Instruction i : instructions.get(l)) {
+			String name = "";
+			if(i.getSymbol() != null){
+			    name = st.getName(i.getSymbol());
 			}
-			for (String i : instructions.get(l)) {
-				b.append((l != 0 ? "\t" : "") + i + "\n");
-			}
+			b.append((l != 0 ? "\t" : "") + i.getOperator() + " " + name + "\n");
+		    }
 		}
 		return b.toString();
 
 	}
+
+	public String toStringLink(SymbolTable st) {
+		System.out.println("instructions.size: " + instructions.size());
+
+		StringBuilder b = new StringBuilder();
+
+		b.append("Linked Instructions:\n");
+		for (int l = 0; l < instructions.size(); l++) {
+		    if (l != 0) {
+			b.append("L" + l);
+		    }
+		    for (Instruction i : instructions.get(l)) {
+			if(i.getSymbol() != null){
+			    b.append((l != 0 ? "\t" : "") + i.getOperator() + " " + i.getSymbol().getAddr() + "\n");
+			}
+			else {
+			    b.append((l != 0 ? "\t" : "") + i.getOperator() + "\n");
+			}
+		    }
+		}
+		return b.toString();
+
+	}
+
+
+    private class Instruction
+    {
+	private String operator;
+	private Symbol symbol;
+
+	public Instruction(String operator, Symbol symbol){
+	    this.operator = operator;
+	    this.symbol = symbol;
+	}
+
+	public String getOperator(){
+	    return operator;
+	}
+
+	public Symbol getSymbol(){
+	    return symbol;
+	}
+    }
 }

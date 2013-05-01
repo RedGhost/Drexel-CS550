@@ -1,7 +1,3 @@
-//
-// Group 3
-// Assignment 2
-//
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -41,8 +37,8 @@ class Ident extends Expr {
 	public ValueType eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable, LinkedList var,
 			SymbolTable st, Translator t) {
-		t.addLoad(name);
-		t.addStore(st.addTemp());
+		t.addLoad(name, st);
+		t.addStore(st.addTemp(), st);
 		return nametable.get(name);
 	}
 }
@@ -81,8 +77,8 @@ class Number extends ValueType {
 			HashMap<String, Proc> functiontable, LinkedList var,
 			SymbolTable st, Translator t) {
 		st.addConstant(value);
-		t.addLoad(value);
-		t.addStore(st.addTemp());
+		t.addLoad(value, st);
+		t.addStore(st.addTemp(), st);
 		return this;
 	}
 }
@@ -148,13 +144,13 @@ class Plus extends Expr {
 			HashMap<String, Proc> functiontable, LinkedList var,
 			SymbolTable st, Translator t) {
 		Number e1 = ((Number) expr1.eval(nametable, functiontable, var, st, t));
-		String e1Tmp = t.getLastTempStore();
+		String e1Tmp = t.getLastTempStore(st);
 		Number e2 = ((Number) expr2.eval(nametable, functiontable, var, st, t));
-		String e2Tmp = t.getLastTempStore();
+		String e2Tmp = t.getLastTempStore(st);
 
-		t.addLoad(e1Tmp);
-		t.addAdd(e2Tmp);
-		t.addStore(st.addTemp());
+		t.addLoad(e1Tmp, st);
+		t.addAdd(e2Tmp, st);
+		t.addStore(st.addTemp(), st);
 
 		return new Number(e1.intValue() + e2.intValue());
 	}
@@ -173,13 +169,13 @@ class Minus extends Expr {
 			HashMap<String, Proc> functiontable, LinkedList var,
 			SymbolTable st, Translator t) {
 		Number e1 = ((Number) expr1.eval(nametable, functiontable, var, st, t));
-		String e1Tmp = t.getLastTempStore();
+		String e1Tmp = t.getLastTempStore(st);
 		Number e2 = ((Number) expr2.eval(nametable, functiontable, var, st, t));
-		String e2Tmp = t.getLastTempStore();
+		String e2Tmp = t.getLastTempStore(st);
 
-		t.addLoad(e1Tmp);
-		t.addSub(e2Tmp);
-		t.addStore(st.addTemp());
+		t.addLoad(e1Tmp, st);
+		t.addSub(e2Tmp, st);
+		t.addStore(st.addTemp(), st);
 
 		return new Number(e1.intValue() - e2.intValue());
 	}
@@ -279,8 +275,8 @@ class AssignStatement extends Statement {
 		st.addVariable(name);
 		ValueType vt = expr.eval(nametable, functiontable, var, st, t);
 		// The expressions should be stored to a temp, get that for the load.
-		t.addLoad(t.getLastTempStore());
-		t.addStore(name);
+		t.addLoad(t.getLastTempStore(st), st);
+		t.addStore(name, st);
 		nametable.put(name, vt);
 	}
 }
@@ -311,16 +307,16 @@ class IfStatement extends Statement {
 		}
 
 		// The expression should be stored to a temp, get that for the load.
-		t.addLoad(t.getLastTempStore());
+		t.addLoad(t.getLastTempStore(st), st);
 		int firstJump = t.addNewInstructionSet();
-		t.addJumpNegative(firstJump);
-		t.addJumpZero(firstJump);
+		t.addJumpNegative(firstJump, st);
+		t.addJumpZero(firstJump, st);
 
 		stmtlist1.eval(nametable, functiontable, var, st, t);
 
 		int secondJump = t.addNewInstructionSet();
 
-		t.addJump(secondJump);
+		t.addJump(secondJump, st);
 		t.setCurrentLabel(firstJump);
 
 		stmtlist2.eval(nametable, functiontable, var, st, t);
@@ -359,16 +355,16 @@ class WhileStatement extends Statement {
 		}
 
 		// The expression should be stored to a temp, get that for the load.
-		t.addLoad(t.getLastTempStore());
+		t.addLoad(t.getLastTempStore(st), st);
 
 		int secondJump = t.addNewInstructionSet();
 
-		t.addJumpNegative(secondJump);
-		t.addJumpZero(secondJump);
+		t.addJumpNegative(secondJump, st);
+		t.addJumpZero(secondJump, st);
 
 		stmtlist.eval(nametable, functiontable, var, st, t);
 
-		t.addJump();
+		t.addJump(st);
 		t.setCurrentLabel(secondJump);
 
 		// while (((Number) expr.eval(nametable, functiontable, var, st, t))
@@ -545,7 +541,7 @@ class Program {
 			SymbolTable st, Translator t) {
 		try {
 			stmtlist.eval(nametable, functiontable, var, st, t);
-			t.addHalt();
+			t.addHalt(st);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
@@ -553,8 +549,8 @@ class Program {
 	}
 
 	public void dump(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functiontable, LinkedList var, Translator t,
-			SymbolTable st) {
+			 HashMap<String, Proc> functiontable, LinkedList var, SymbolTable st,
+			 Translator t) {
 		// System.out.println(hm.values());
 		// System.out.println("Dumping out all the variables...");
 		// if (nametable != null) {
@@ -575,7 +571,10 @@ class Program {
 		System.out.println(st);
 
 		System.out.println("Dumping out the translated instructions...");
-		System.out.println(t);
+		System.out.println(t.toString(st));
+
+		System.out.println("Dumping out the linked instructions...");
+		System.out.println(t.toStringLink(st));
 	}
 }
 
