@@ -1,5 +1,6 @@
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.Stack;
 
 public class Translator {
 	/**
@@ -176,6 +177,81 @@ public class Translator {
 		return b.toString();
 
 	}
+
+	public void optimize(SymbolTable st) {
+
+		TreeMap<Integer, Stack<Integer>> remove = new TreeMap<Integer, Stack<Integer>>();
+	   	//Looking to remove LD right after ST of the same variable
+	   	boolean stFlag = false;
+	   	int stNum = -1;
+	   	int delCount = 0;
+		int delCount2 = 0;
+		int count = 0;
+		
+		for (int l = 0; l < instructions.size(); l++) {
+		    count = 0;
+		    Stack<Integer> tempvec = new Stack<Integer>();
+		    for (Instruction i : instructions.get(l)) {
+			if(i.getSymbol() != null){
+			    if(stFlag == true && i.getOperator() != "LD") {
+				stFlag = false;
+			        stNum = -1;
+			    }
+			    if(i.getOperator() == "ST") {
+				stFlag = true;
+				stNum = (int)i.getSymbol().getAddr();
+			    }
+			    if(i.getOperator() == "LD" && stFlag == true && (int)i.getSymbol().getAddr() == stNum) {
+			     	delCount++;
+				tempvec.push(count); 
+			    } //end if
+			} //end if
+			count++;
+		    } //end for
+		    remove.put(l, tempvec);
+		    
+		    Symbol labelSymbol = st.getSymbol("L" + l);
+		    if(labelSymbol != null){
+		        labelSymbol.setAddr(labelSymbol.getAddr()-delCount2);
+		    } //end if
+
+			//It goes one ahead of what I want, so I use this to go back
+		    delCount2 = delCount;
+		} //end for
+		for (int l = 0; l < remove.size(); l++) {
+		    while(!remove.get(l).empty()) {
+			int r = remove.get(l).pop();
+			instructions.get(l).remove(r);
+		    }
+		}
+	}//end optimize
+
+	public String toStringOpt(SymbolTable st) {
+		
+		optimize(st);
+		System.out.println("instructions.size: " + instructions.size());
+
+		StringBuilder b = new StringBuilder();
+		
+		b.append("Optimized Instructions:\n");
+		for (int l = 0; l < instructions.size(); l++) {
+		    if (l != 0) {
+			b.append("L" + l);
+		    }
+		    for (Instruction i : instructions.get(l)) {
+			if(i.getSymbol() != null){
+			    if(i.getSymbol() != null){
+				b.append((l != 0 ? "\t" : "") + i.getOperator() + " " + i.getSymbol().getAddr() + "\n");
+			    }
+			}
+			else {
+			    b.append((l != 0 ? "\t" : "") + i.getOperator() + "\n");
+			} //
+		    }
+		}
+		return b.toString();
+	}
+
 
 
     private class Instruction

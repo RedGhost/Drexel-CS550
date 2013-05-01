@@ -575,6 +575,9 @@ class Program {
 
 		System.out.println("Dumping out the linked instructions...");
 		System.out.println(t.toStringLink(st));
+
+		System.out.println("Dumping out Optimized instructions...");
+		System.out.println(t.toStringOpt(st));
 	}
 }
 
