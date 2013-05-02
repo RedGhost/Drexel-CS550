@@ -1,6 +1,8 @@
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 class Expr {
 
@@ -570,15 +572,32 @@ class Program {
 		System.out.println("Dumping out the symbol table...");
 		System.out.println(st);
 
-		System.out.println("Dumping out the translated instructions...");
-		System.out.println(t.toString(st));
+		//TODO: Have these file names passed is as params?
+		String translatedFile = "trans.out";
+		System.out.println("Dumping out the translated instructions to file " + translatedFile + "...");
+		writeFile(translatedFile, t.toString(st));
 
-		System.out.println("Dumping out the linked instructions...");
-		System.out.println(t.toStringLink(st));
+		String linkedFile = "linked.out";
+		System.out.println("Dumping out the linked instructions to file " + linkedFile + "...");
+		writeFile(linkedFile, t.toStringLink(st));
 
-		System.out.println("Dumping out Optimized instructions...");
-		System.out.println(t.toStringOpt(st));
+		String optimizedFile = "optimized.out";
+		System.out.println("Dumping out Optimized instructions to file " + optimizedFile + "...");
+		writeFile(optimizedFile, t.toStringOpt(st));
 	}
+
+        private void writeFile(String filename, String text) {
+	    try{
+		// Create file 
+		FileWriter fstream = new FileWriter(filename);
+		BufferedWriter out = new BufferedWriter(fstream);
+		out.write(text);
+		//Close the output stream
+		out.close();
+	    }catch (Exception e){//Catch exception if any
+		System.err.println("Error: " + e.getMessage());
+	    }
+        }
 }
 
 // Assignment 2 (mwa29)
