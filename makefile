@@ -50,3 +50,4 @@ clean :
 	-\rm -v parser.java
 	-\rm -v sym.java
 	-\rm -v Yylex.java*
+	-\rm -v *.out

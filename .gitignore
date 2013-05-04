@@ -9,3 +9,6 @@
 Yylex.java*
 parser.java
 sym.java
+
+# Output files #
+*.out
