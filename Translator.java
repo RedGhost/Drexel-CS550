@@ -25,7 +25,6 @@ public class Translator {
         public void link(SymbolTable st) {
 	    int addr = 1;
 	    for (int l = 0; l < instructions.size(); l++) {
-		System.out.println(addr);
 		Symbol labelSymbol = st.getSymbol("L" + l);
 		if(labelSymbol != null){
 		    labelSymbol.setAddr(addr);
@@ -160,7 +159,6 @@ public class Translator {
 
 		StringBuilder b = new StringBuilder();
 
-		b.append("Linked Instructions:\n");
 		for (int l = 0; l < instructions.size(); l++) {
 		    if (l != 0) {
 			b.append("L" + l);
@@ -233,7 +231,6 @@ public class Translator {
 
 		StringBuilder b = new StringBuilder();
 		
-		b.append("Optimized Instructions:\n");
 		for (int l = 0; l < instructions.size(); l++) {
 		    if (l != 0) {
 			b.append("L" + l);

@@ -584,6 +584,10 @@ class Program {
 		String optimizedFile = "optimized.out";
 		System.out.println("Dumping out Optimized instructions to file " + optimizedFile + "...");
 		writeFile(optimizedFile, t.toStringOpt(st));
+
+		String initialMemory = "initialmemory.out";
+		System.out.println("Dumping out the initial memory to file " + initialMemory + "...");
+		writeFile(initialMemory, st.getInitialMemory());
 	}
 
         private void writeFile(String filename, String text) {

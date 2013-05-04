@@ -8,6 +8,8 @@ public class SymbolTable {
 	private int numVars = 0;
 	private int numTemps = 0;
 
+        private String initialMemory;
+
 	public SymbolTable() {
 		symbols = new HashMap<String, Symbol>();
 	}
@@ -33,6 +35,10 @@ public class SymbolTable {
 	    }
 	    return null;
 	}
+
+        public String getInitialMemory() {
+	    return initialMemory;
+        }
 
 	public void addConstant(Integer c) {
 		if (symbols.get("C" + c.toString()) == null) {
@@ -85,6 +91,8 @@ public class SymbolTable {
 	}
 
         public void link(){
+	    StringBuilder b = new StringBuilder();
+
 	    int currAddr = 1;
 
 	    // Constants
@@ -93,6 +101,7 @@ public class SymbolTable {
 	    while(index < numConsts){
 		String key = "C"+currKeyNum;
 		if(symbols.containsKey(key)){
+		    b.append(currAddr + " " + symbols.get(key).getValue() + "\n");
 		    symbols.get(key).setAddr(currAddr++);
 		    index++;
 		}
@@ -102,9 +111,12 @@ public class SymbolTable {
 	    // Variables
 	    for(String key : symbols.keySet()){
 		if(symbols.get(key).getType() == Symbol.VARIABLE){
+		    b.append(currAddr + " 0\n");
 		    symbols.get(key).setAddr(currAddr++); 
 		}
 	    }
+
+	    initialMemory = b.toString();
 
 	    // Temps
 	    for(int i = 0; i < numTemps; i++){

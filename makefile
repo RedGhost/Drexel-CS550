@@ -5,6 +5,7 @@ cup_runtime=java-cup-11a-runtime.jar
 CLASSPATH=./:$(cup_location):$(cup_runtime)
 lex=jflex
 pager=less
+ram=~jjohnson/bin/ram
 
 .PHONY : view compile view-trans view-link view-op run run-op clean
 # view — display (using the more utility) all of your source code (excluding the modified RAM)
@@ -35,15 +36,20 @@ compile : interpreterext.cup interpreterext.flex Program.java SymbolTable.java T
 	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java Program.java SymbolTable.java Translator.java Symbol.java
 	$(java) -classpath $(CLASSPATH) parser
 
-view-trans :
+view-trans : trans.out
+	-$(pager) trans.out
 
-view-link :
+view-link : linked.out
+	-$(pager) linked.out
 
-view-op :
+view-op : optimized.out
+	-$(pager) optimized.out
 
-run :
+run : linked.out
+	-$(ram) linked.out initialmemory.out
 
-run-op:
+run-op: optimized.out
+	-$(ram) optimized.out initialmemory.out
 
 clean :
 	-\rm -v *.class
