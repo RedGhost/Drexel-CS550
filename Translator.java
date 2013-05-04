@@ -40,7 +40,7 @@ public class Translator {
 	 *            - Constant to load.
 	 */
 	public void addLoad(Integer n, SymbolTable st) {
-	    instructions.get(currentLabel).add(new Instruction("LD", st.getSymbol("C" + n)));
+	    instructions.get(currentLabel).add(new Instruction("LDA", st.getSymbol("C" + n)));
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class Translator {
 	 *            - Constant to load.
 	 */
 	public void addLoad(String n, SymbolTable st) {
-		instructions.get(currentLabel).add(new Instruction("LD", st.getSymbol(n)));
+		instructions.get(currentLabel).add(new Instruction("LDA", st.getSymbol(n)));
 	}
 
 	/**
@@ -60,7 +60,7 @@ public class Translator {
 	 *            - Name of the temp variable to store into.
 	 */
 	public void addStore(String t, SymbolTable st) {
-	    instructions.get(currentLabel).add(new Instruction("ST", st.getSymbol(t)));
+	    instructions.get(currentLabel).add(new Instruction("STA", st.getSymbol(t)));
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class Translator {
 	 */
 	public String getLastTempStore(SymbolTable st) {
 		for (int i = instructions.get(currentLabel).size() - 1; i >= 0; i--) {
-		    if (instructions.get(currentLabel).get(i).getOperator().equals("ST") &&
+		    if (instructions.get(currentLabel).get(i).getOperator().equals("STA") &&
 			instructions.get(currentLabel).get(i).getSymbol().getType() == Symbol.TEMP) {
 			return st.getName(instructions.get(currentLabel).get(i).getSymbol());
 			}
@@ -160,15 +160,12 @@ public class Translator {
 		StringBuilder b = new StringBuilder();
 
 		for (int l = 0; l < instructions.size(); l++) {
-		    if (l != 0) {
-			b.append("L" + l);
-		    }
 		    for (Instruction i : instructions.get(l)) {
 			if(i.getSymbol() != null){
-			    b.append((l != 0 ? "\t" : "") + i.getOperator() + " " + i.getSymbol().getAddr() + "\n");
+			    b.append(i.getOperator() + " " + i.getSymbol().getAddr() + "\n");
 			}
 			else {
-			    b.append((l != 0 ? "\t" : "") + i.getOperator() + "\n");
+			    b.append(i.getOperator() + "\n");
 			}
 		    }
 		}
@@ -191,15 +188,15 @@ public class Translator {
 		    Stack<Integer> tempvec = new Stack<Integer>();
 		    for (Instruction i : instructions.get(l)) {
 			if(i.getSymbol() != null){
-			    if(stFlag == true && i.getOperator() != "LD") {
+			    if(stFlag == true && i.getOperator() != "LDA") {
 				stFlag = false;
 			        stNum = -1;
 			    }
-			    if(i.getOperator() == "ST") {
+			    if(i.getOperator() == "STA") {
 				stFlag = true;
 				stNum = (int)i.getSymbol().getAddr();
 			    }
-			    if(i.getOperator() == "LD" && stFlag == true && (int)i.getSymbol().getAddr() == stNum) {
+			    if(i.getOperator() == "LDA" && stFlag == true && (int)i.getSymbol().getAddr() == stNum) {
 			     	delCount++;
 				tempvec.push(count); 
 			    } //end if
@@ -232,18 +229,15 @@ public class Translator {
 		StringBuilder b = new StringBuilder();
 		
 		for (int l = 0; l < instructions.size(); l++) {
-		    if (l != 0) {
-			b.append("L" + l);
-		    }
 		    for (Instruction i : instructions.get(l)) {
 			if(i.getSymbol() != null){
 			    if(i.getSymbol() != null){
-				b.append((l != 0 ? "\t" : "") + i.getOperator() + " " + i.getSymbol().getAddr() + "\n");
+				b.append(i.getOperator() + " " + i.getSymbol().getAddr() + "\n");
 			    }
 			}
 			else {
-			    b.append((l != 0 ? "\t" : "") + i.getOperator() + "\n");
-			} //
+			    b.append(i.getOperator() + "\n");
+			}
 		    }
 		}
 		return b.toString();
