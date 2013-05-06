@@ -116,11 +116,13 @@ public class SymbolTable {
 		}
 	    }
 
-	    initialMemory = b.toString();
 
 	    // Temps
 	    for(int i = 0; i < numTemps; i++){
+		b.append(currAddr + " 0\n");
 		symbols.get("T"+i).setAddr(currAddr++);
 	    }
+
+	    initialMemory = b.toString();
         }
 }
