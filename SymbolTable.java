@@ -116,7 +116,6 @@ public class SymbolTable {
 		}
 	    }
 
-
 	    // Temps
 	    for(int i = 0; i < numTemps; i++){
 		b.append(currAddr + " 0\n");

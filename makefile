@@ -5,7 +5,7 @@ cup_runtime=java-cup-11a-runtime.jar
 CLASSPATH=./:$(cup_location):$(cup_runtime)
 lex=jflex
 pager=less
-ram=~jjohnson/bin/ram
+ram=./ram
 
 .PHONY : view compile view-trans view-link view-op run run-op clean
 # view — display (using the more utility) all of your source code (excluding the modified RAM)
