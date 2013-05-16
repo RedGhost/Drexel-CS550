@@ -101,7 +101,7 @@ public class SymbolTable {
 	    while(index < numConsts){
 		String key = "C"+currKeyNum;
 		if(symbols.containsKey(key)){
-		    b.append(currAddr + " " + symbols.get(key).getValue() + "\n");
+		    b.append(currAddr + " " + symbols.get(key).getValue() + "\t; " + key + "\n");
 		    symbols.get(key).setAddr(currAddr++);
 		    index++;
 		}
@@ -111,14 +111,14 @@ public class SymbolTable {
 	    // Variables
 	    for(String key : symbols.keySet()){
 		if(symbols.get(key).getType() == Symbol.VARIABLE){
-		    b.append(currAddr + " 0\n");
+		    b.append(currAddr + " 0\t; " + key + "\n");
 		    symbols.get(key).setAddr(currAddr++); 
 		}
 	    }
 
 	    // Temps
 	    for(int i = 0; i < numTemps; i++){
-		b.append(currAddr + " 0\n");
+		b.append(currAddr + " 0\t; T" + i + "\n");
 		symbols.get("T"+i).setAddr(currAddr++);
 	    }
 
