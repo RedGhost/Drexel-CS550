@@ -10,8 +10,14 @@ public class SymbolTable {
 
         private String initialMemory;
 
+        // Number of built in variables
+        private int numBuiltIn = 0;
+
 	public SymbolTable() {
 		symbols = new HashMap<String, Symbol>();
+		// Create frame pointer and stack pointer (Chart 27 of compile lecture)
+		addBuiltIn("FP"); numBuiltIn++;
+		addBuiltIn("SP"); numBuiltIn++;
 	}
 
         public HashMap<String, Symbol> getSymbols(){
@@ -56,6 +62,14 @@ public class SymbolTable {
 		}
 	}
 
+	public void addBuiltIn(String name) {
+		if (symbols.get(name) == null) {
+			symbols.put(name, new Symbol(Symbol.UNDEFINED, Symbol.BUILT_IN,
+					Symbol.UNDEFINED));
+			numVars++;
+		}
+	}
+
 	/**
 	 * Add a temporary variable to the symbol table.
 	 * 
@@ -94,6 +108,14 @@ public class SymbolTable {
 	    StringBuilder b = new StringBuilder();
 
 	    int currAddr = 1;
+
+            // Built in (FP, SP)
+	    for(String key : symbols.keySet()){
+		if(symbols.get(key).getType() == Symbol.BUILT_IN){
+		    b.append(currAddr + " 0\t; " + key + "\n");
+		    symbols.get(key).setAddr(currAddr++); 
+		}
+	    }
 
 	    // Constants
 	    int currKeyNum = 0;

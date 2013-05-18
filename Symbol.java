@@ -1,9 +1,10 @@
 public class Symbol {
     public static final int UNDEFINED = -1;
-    public static final int CONSTANT = 0;
-    public static final int VARIABLE = 1;
-    public static final int TEMP = 2;
-    public static final int LABEL = 3;
+    public static final int BUILT_IN = 0;
+    public static final int CONSTANT = 1;
+    public static final int VARIABLE = 2;
+    public static final int TEMP = 3;
+    public static final int LABEL = 4;
 
     private int value;
     private int type;

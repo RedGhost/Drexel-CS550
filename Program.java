@@ -478,6 +478,15 @@ class Proc {
 	private ParamList parameterlist;
 	private StatementList stmtlist;
 
+        private SymbolTable st;
+
+        private int startingAddress; // memory address of this function
+
+        // From compile lecture (chart 32)
+        private int returnValue;
+        private int prevFP;
+        private int returnAddress;
+
 	public Proc(ParamList pl, StatementList sl) {
 		parameterlist = pl;
 		stmtlist = sl;
@@ -533,6 +542,8 @@ class Proc {
 class Program {
 
 	private StatementList stmtlist;
+
+        private int startingAddress;
 
 	public Program(StatementList list) {
 		stmtlist = list;
