@@ -1,4 +1,4 @@
--import java_cup.runtime.*;
+import java_cup.runtime.*;
 import java.util.*;
 
 action code {:
@@ -11,9 +11,8 @@ action code {:
 	 * but helpful to dump all the values at the end */
 	public LinkedList var = new LinkedList();
     /* ft is used to store and retrieve the functions */
-	//    public HashMap ft = new HashMap();
-	public FunctionTable ft = new FunctionTable();
-
+    public HashMap ft = new HashMap();
+    
     /* Added for assignment 3 */
     public SymbolTable st = new SymbolTable();
     public Translator t = new Translator();
