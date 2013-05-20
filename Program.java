@@ -223,6 +223,15 @@ class FunctionCall extends Expr {
 	    int numVars = callFunction.getTemps().size() + callFunction.getVars().size() + callFunction.getParams().size() + 3;
 	    
 	    Symbol numberOfVars = st.addConstant(numVars);
+
+	    LinkedList<Expr> list = explist.getExpressions();
+	    int i = 0;
+	    for(Expr e : list) {
+		Symbol a = e.translate(st, ft, function);
+		Symbol b = new Symbol(" ", a.getValue(), 1, st.getFP().getValue()+i);
+		function.add(Instruction.Store(b));
+		i++;
+	    }
 	    
 	    //int SP = st.getSP().getValue();
 	    //int FP = SP;
