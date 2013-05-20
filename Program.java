@@ -234,7 +234,7 @@ class FunctionCall extends Expr {
 		function.add(Instruction.Store(st.getFP()));
 		function.add(Instruction.Add(numberOfVars));
 		function.add(Instruction.Store(st.getSP()));
-		function.add(Instruction.Load(st.getFP());
+		function.add(Instruction.Load(st.getFP()));
 
 		// Place all the parameters at the start of the record
 		Symbol constant1 = st.addConstant(new Integer(1));
