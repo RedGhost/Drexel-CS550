@@ -47,11 +47,15 @@ class Instruction
         return symbol;
     }
 
+    public boolean isNOP() {
+        return operator.equals("NOP");
+    }
+
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(operator);
         if(symbol != null) {
-            builder.append(" " + symbol.getValue());
+            builder.append(" " + symbol);
         }
         return builder.toString();
     }

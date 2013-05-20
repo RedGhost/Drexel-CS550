@@ -1,8 +1,6 @@
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
 
 class Expr {
 
@@ -278,7 +276,13 @@ class DefineStatement extends Statement {
 	}
 
 	public void translate(SymbolTable st, FunctionTable ft, Function function) {
-	    Symbol label = st.createLabel();
+	    Symbol label;
+            if(name.equals("main")) {
+		label = st.getMainLocation();
+	    }
+	    else {
+		label = st.createLabel();
+	    }
             Function newFunction = new Function(name, label);
 	    proc.translate(st, ft, newFunction);
 	    ft.addFunction(newFunction);
@@ -488,6 +492,10 @@ class ExpressionList {
 
 	private LinkedList<Expr> list;
 
+	public ExpressionList() {
+		list = new LinkedList<Expr>();
+	}
+
 	public ExpressionList(Expr ex) {
 		list = new LinkedList<Expr>();
 		list.add(ex);
@@ -635,59 +643,6 @@ class Program {
 			System.out.println(e.getMessage());
 		}
 	}
-
-	public void dump(HashMap<String, ValueType> nametable,
-			 HashMap<String, Proc> functiontable,  SymbolTable st,
-			 Linker t) {
-		// System.out.println(hm.values());
-		// System.out.println("Dumping out all the variables...");
-		// if (nametable != null) {
-		// for (String name : nametable.keySet()) {
-		// System.out.println(name
-		// + "="
-		// + nametable.get(name).toString(nametable,
-		// functiontable, st, t));
-		// }
-		// }
-		// if (functiontable != null) {
-		// for (String name : functiontable.keySet()) {
-		// System.out.println("Function: " + name + " defined...");
-		// }
-		// }
-
-		System.out.println("Dumping out the symbol table...");
-		System.out.println(st);
-
-		//TODO: Have these file names passed is as params?
-		String translatedFile = "trans.out";
-		System.out.println("Dumping out the translated instructions to file " + translatedFile + "...");
-		writeFile(translatedFile, t.toString(st));
-
-		String linkedFile = "linked.out";
-		System.out.println("Dumping out the linked instructions to file " + linkedFile + "...");
-		writeFile(linkedFile, t.toStringLink(st));
-
-		String optimizedFile = "optimized.out";
-		System.out.println("Dumping out Optimized instructions to file " + optimizedFile + "...");
-		writeFile(optimizedFile, t.toStringOpt(st));
-
-		String initialMemory = "initialmemory.out";
-		System.out.println("Dumping out the initial memory to file " + initialMemory + "...");
-		writeFile(initialMemory, t.toStringInitialMemory(st));
-	}
-
-        private void writeFile(String filename, String text) {
-	    try{
-		// Create file 
-		FileWriter fstream = new FileWriter(filename);
-		BufferedWriter out = new BufferedWriter(fstream);
-		out.write(text);
-		//Close the output stream
-		out.close();
-	    }catch (Exception e){//Catch exception if any
-		System.err.println("Error: " + e.getMessage());
-	    }
-        }
 }
 
 // Assignment 2 (mwa29)
