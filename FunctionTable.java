@@ -28,6 +28,16 @@ class Function {
 		return this.name;
 	}
 
+	public HashMap<String, Symbol> getVars() {
+		return this.variableSymbols;
+	}
+	public HashMap<String, Symbol> getParams() {
+		return this.parameterSymbols;
+	}
+	public LinkedList<Symbol> getTemps() {
+		return this.tempSymbols;
+	}
+
 	public Symbol getLabel() {
 		return this.label;
 	}

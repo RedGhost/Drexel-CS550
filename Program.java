@@ -222,6 +222,25 @@ class FunctionCall extends Expr {
 
 	public Symbol translate(SymbolTable st, FunctionTable ft, Function function) {
 	    Function callFunction = ft.get(funcid);
+	    int numVars = callFunction.getTemps().size() + callFunction.getVars().size() + callFunction.getParams().size() + 3;
+	    
+	    Symbol numberOfVars = st.addConstant(numVars);
+	    
+	    int SP = st.getSP().getValue();
+	    int FP = SP;
+	    st.getFP().setValue(FP);
+	    
+	    System.out.println("FuncID is " + funcid);
+	    System.out.println("CF has " + numVars + " vars and FP is " + FP + " SP = " + SP);
+	    SP = SP + numVars;
+	    st.getSP().setAddr(SP);
+	    System.out.println("SP is now " + SP);
+	    
+	    function.add(Instruction.Load(st.getSP()));
+	    function.add(Instruction.Store(st.getFP()));
+	    function.add(Instruction.Add(numberOfVars));
+	    function.add(Instruction.Jump(callFunction.getLabel()));
+
 		//TODO: this
             return null; 
 	}
@@ -589,6 +608,7 @@ class Program {
 	private StatementList stmtlist;
 
         private int startingAddress;
+	private Symbol label;
 
 	public Program(StatementList list) {
 		stmtlist = list;
@@ -596,6 +616,7 @@ class Program {
 
 	public void translate(SymbolTable st, FunctionTable ft) {
 		try {
+			function.add(Instruction.Jump(st.getMainLocation()));
 			Proc mainProc = new Proc(new ParamList(), stmtlist);
 			DefineStatement main = new DefineStatement("main", mainProc);
 			main.translate(st, ft, null);

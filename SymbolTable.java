@@ -65,6 +65,8 @@ public class SymbolTable {
 			Symbol newConstant = new Symbol(c, Symbol.CONSTANT,
 					Symbol.UNDEFINED);
 			constants.put("C" + c.toString(), newConstant);
+			SP.setValue(SP.getValue()+1);
+			FP.setValue(FP.getValue()+1);
 			return newConstant;
 		}
 		else {
