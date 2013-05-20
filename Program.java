@@ -222,12 +222,19 @@ class FunctionCall extends Expr {
 	    	Function callFunction = ft.get(funcid);
 	   	int numVars = callFunction.getTemps().size() + callFunction.getVars().size() + callFunction.getParams().size() + 3;
 	    
+
 	    	Symbol numberOfVars = st.addConstant(numVars);
 
 		if (callFunction.getParams().size() != explist.getExpressions().size()) {
 			System.out.println("Syntax Error: Param count does not match");
 			System.exit(1);
 		}
+	    
+		function.add(Instruction.Load(st.getSP()));
+		function.add(Instruction.Store(st.getFP()));
+		function.add(Instruction.Add(numberOfVars));
+		function.add(Instruction.Store(st.getSP()));
+		function.add(Instruction.Load(st.getFP());
 
 		// Place all the parameters at the start of the record
 		Symbol constant1 = st.addConstant(new Integer(1));
