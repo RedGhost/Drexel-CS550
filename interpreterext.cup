@@ -15,7 +15,8 @@ action code {:
     
     /* Added for assignment 3 */
     public SymbolTable st = new SymbolTable();
-    public Translator t = new Translator();
+    public FunctionTable funcTable = new FunctionTable();
+    public Linker linker = new Linker();
     
 :}
 
@@ -47,10 +48,10 @@ non terminal Sequence sequence;
 
 program ::= statement_list:list
 	    {: Program program = new Program(list);
-	       program.eval(hm, ft, var, st, t);
-               st.link();
-               t.link(st);
-	       program.dump(hm, ft, var, st, t);
+	       //program.eval(hm, ft, st, t);
+               program.translate(st, funcTable);
+               linker.link(st, funcTable);
+	      // program.dump(hm, ft, st, t);
 	     :};
 
 statement_list ::= statement:s

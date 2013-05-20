@@ -28,6 +28,10 @@ public class Symbol {
 	return addr;
     }
 
+    public void setValue(int value) {
+        this.value = value;
+    }
+
     public void setAddr(int addr) {
 	this.addr = addr;
     }
