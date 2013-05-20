@@ -336,16 +336,19 @@ class IfStatement extends Statement {
 
 	public void translate(SymbolTable st, FunctionTable ft, Function function) {
             Symbol c = expr.translate(st, ft, function);
-	    function.add(Instruction.Load(c));
 
             Symbol firstLabel = st.createLabel();
+            Symbol secondLabel = st.createLabel();
+
+	    function.add(Instruction.Load(c));
 	    function.add(Instruction.JumpNegative(firstLabel));
 	    function.add(Instruction.JumpZero(firstLabel));
 	    stmtlist1.translate(st, ft, function);
 
-            Symbol secondLabel = st.createLabel();
 	    function.add(Instruction.Jump(secondLabel));
+	    function.add(firstLabel, Instruction.NOP());
 	    stmtlist2.translate(st, ft, function);
+	    function.add(secondLabel, Instruction.NOP());
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
@@ -376,17 +379,18 @@ class WhileStatement extends Statement {
 
 	public void translate(SymbolTable st, FunctionTable ft, Function function) {
             Symbol firstLabel = st.createLabel();
+	    Symbol secondLabel = st.createLabel();
 
 	    Symbol c = expr.translate(st, ft, function);
-	    function.add(Instruction.Load(c));
+	    function.add(firstLabel, Instruction.Load(c));
 
-	    Symbol secondLabel = st.createLabel();
 	    function.add(Instruction.JumpNegative(secondLabel));
 	    function.add(Instruction.JumpZero(secondLabel));
 
 	    stmtlist.translate(st, ft, function);
 
 	    function.add(Instruction.Jump(firstLabel));
+	    function.add(secondLabel, Instruction.NOP());
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
@@ -525,6 +529,12 @@ class Proc {
 	}
 
 	public void translate(SymbolTable st, FunctionTable ft, Function function) {
+		Iterator<String> p = parameterlist.getParamList().iterator();
+		while(p.hasNext()) {
+			String param = p.next();
+			function.addParameter(param);
+		}
+		stmtlist.translate(st, ft, function);
 	}
 
 	public ValueType apply(HashMap<String, ValueType> nametable,

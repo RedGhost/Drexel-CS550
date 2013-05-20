@@ -22,9 +22,12 @@ public class Linker {
             st.getFP().setValue(memoryAddr);
             st.getSP().setValue(memoryAddr);
 
+	    int addr = 1;
 	    HashMap<String, Function> functions = ft.getFunctions();
 	    for(String functionName : functions.keySet()) {
-	        System.out.println(functionName);
+		if(functionName.equals("main")) {
+			// Set address here to main Loc
+		}
 	    }
              /*
 	    int addr = 1;

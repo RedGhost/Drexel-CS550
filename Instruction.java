@@ -3,6 +3,9 @@ class Instruction
     private String operator;
     private Symbol symbol;
 
+    public static Instruction NOP() {
+        return new Instruction("NOP", null);
+    }
     public static Instruction Load(Symbol symbol) {
         return new Instruction("LDA", symbol);
     }

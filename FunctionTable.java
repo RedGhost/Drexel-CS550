@@ -5,15 +5,21 @@ class Function {
 	private String name;
 	private Symbol label;
 	private LinkedList<Instruction> instructions;
+	private HashMap<Integer, Symbol> labels;
 	private LinkedList<Symbol> tempSymbols;
 	private HashMap<String, Symbol> variableSymbols;
+	private HashMap<String, Symbol> parameterSymbols;
+
+	private int labelCount;
 	
 	public Function(String name, Symbol label) {
 		this.name = name;
 		this.label = label;
 		this.instructions = new LinkedList<Instruction>();
+		this.labels = new HashMap<Integer, Symbol>();
 		this.tempSymbols = new LinkedList<Symbol>();
 		this.variableSymbols = new HashMap<String, Symbol>();
+		this.parameterSymbols = new HashMap<String, Symbol>();
 	}
 
 	public String getName() {
@@ -37,8 +43,19 @@ class Function {
 		}
 	}
 
+	public void addParameter(String name) {
+		if(!parameterSymbols.containsKey(name)) {
+			parameterSymbols.put(name, new Symbol(0, Symbol.VARIABLE, Symbol.UNDEFINED));
+		}
+	}
+
 	public void add(Instruction instruction) {
 		instructions.addLast(instruction);
+	}
+
+	public void add(Symbol label, Instruction instruction) {
+		instructions.addLast(instruction);
+		labels.put(new Integer(instructions.size()), label);
 	}
 }
 
