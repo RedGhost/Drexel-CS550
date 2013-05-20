@@ -15,6 +15,9 @@ class Instruction
     public static Instruction Add(Symbol symbol) {
         return new Instruction("ADD", symbol);
     }
+    public static Instruction Mul(Symbol symbol) {
+	return new Instruction("MUL", symbol);
+    }
     public static Instruction Subtract(Symbol symbol) {
         return new Instruction("SUB", symbol);
     }
