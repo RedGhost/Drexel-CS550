@@ -9,8 +9,14 @@ class Instruction
     public static Instruction Load(Symbol symbol) {
         return new Instruction("LDA", symbol);
     }
+    public static Instruction Loadi(Symbol symbol) {
+        return new Instruction("LDI", symbol);
+    }
     public static Instruction Store(Symbol symbol) {
         return new Instruction("STA", symbol);
+    }
+    public static Instruction Storei(Symbol symbol) {
+        return new Instruction("STI", symbol);
     }
     public static Instruction Add(Symbol symbol) {
         return new Instruction("ADD", symbol);

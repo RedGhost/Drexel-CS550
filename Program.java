@@ -219,26 +219,35 @@ class FunctionCall extends Expr {
 	}
 
 	public Symbol translate(SymbolTable st, FunctionTable ft, Function function) {
-	    Function callFunction = ft.get(funcid);
-	    int numVars = callFunction.getTemps().size() + callFunction.getVars().size() + callFunction.getParams().size() + 3;
+	    	Function callFunction = ft.get(funcid);
+	   	int numVars = callFunction.getTemps().size() + callFunction.getVars().size() + callFunction.getParams().size() + 3;
 	    
-	    Symbol numberOfVars = st.addConstant(numVars);
+	    	Symbol numberOfVars = st.addConstant(numVars);
+
+		if (callFunction.getParams().size() != expressionlist
+				.getExpressions().size()) {
+			System.out.println("Syntax Error: Param count does not match");
+			System.exit(1);
+		}
 	    
-	    //int SP = st.getSP().getValue();
-	    //int FP = SP;
-	    //st.getFP().setValue(FP);
-	    
-	    //System.out.println("FuncID is " + funcid);
-	    //System.out.println("CF has " + numVars + " vars and FP is " + FP + " SP = " + SP);
-	    //SP = SP + numVars;
-	    //st.getSP().setValue(SP);
-	    //System.out.println("SP is now " + SP);
-	    
-	    function.add(Instruction.Load(st.getSP()));
-	    function.add(Instruction.Store(st.getFP()));
-	    function.add(Instruction.Add(numberOfVars));
-	    function.add(Instruction.Store(st.getFP()));
-	    function.add(Instruction.Jump(callFunction.getLabel()));
+		function.add(Instruction.Load(st.getSP()));
+		function.add(Instruction.Store(st.getFP()));
+		function.add(Instruction.Add(numberOfVars));
+		function.add(Instruction.Store(st.getSP()));
+		function.add(Instruction.Load(st.getFP());
+
+		Symbol constant1 = st.addConstant(new Integer(1));
+		LinkedList<Expr> expressions = explist.getExpressions();
+		while (Expr expression : expressions) {
+			Symbol symbol = expression.translate(st, ft, function);
+
+			function.add(Instruction.Load(symbol));
+                        
+			function.add(Instruction.Load(st.getFP());
+			function.add(Instruction.Add(constant1));
+		}
+
+		function.add(Instruction.Jump(callFunction.getLabel()));
 
 		//TODO: this
             return null; 
