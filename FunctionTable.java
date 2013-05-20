@@ -99,12 +99,14 @@ class Function {
                 int i = startAddress;
 		int j = 0;
 		for(Instruction instruction : instructions) {
+			if(startAddress < 0) {
 			if(j == 0 && this.label != null) {
                         	builder.append(this.label + ":\n");
                         }
                     	if(labels.containsKey(new Integer(j))) {
 				builder.append(labels.get(new Integer(j)) + ":\n");
 			}
+                        }
                         if(!instruction.isNOP()) {
 			    	builder.append(instruction + "\n");
                         }

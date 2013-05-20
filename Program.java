@@ -242,6 +242,7 @@ class FunctionCall extends Expr {
 			function.add(Instruction.Add(constant1));
 			function.add(Instruction.Store(st.getSP()));
 		}
+		function.add(Instruction.Load(st.getSP()));
 
 		// Allocate space for the variables
 		Symbol constantVarSize = st.addConstant(new Integer(callFunction.getVars().size()));
