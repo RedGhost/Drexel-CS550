@@ -229,23 +229,50 @@ class FunctionCall extends Expr {
 			System.out.println("Syntax Error: Param count does not match");
 			System.exit(1);
 		}
-	    
-		function.add(Instruction.Load(st.getSP()));
-		function.add(Instruction.Store(st.getFP()));
-		function.add(Instruction.Add(numberOfVars));
-		function.add(Instruction.Store(st.getSP()));
-		function.add(Instruction.Load(st.getFP());
 
+		// Place all the parameters at the start of the record
 		Symbol constant1 = st.addConstant(new Integer(1));
+		Symbol constant0 = st.addConstant(new Integer(0));
 		LinkedList<Expr> expressions = explist.getExpressions();
 		while (Expr expression : expressions) {
 			Symbol symbol = expression.translate(st, ft, function);
-
 			function.add(Instruction.Load(symbol));
                         
-			function.add(Instruction.Load(st.getFP());
+			function.add(Instruction.Storei(st.getSP());
+			function.add(Instruction.Load(st.getSP()));
 			function.add(Instruction.Add(constant1));
+			function.add(Instruction.Store(st.getSP()));
 		}
+
+		// Allocate space for the variables
+		Symbol constantVarSize = st.addConstant(new Integer(callFunction.getVars().size()));
+		function.add(Instruction.Add(constantVarSize));
+		function.add(Instruction.Store(st.getSP()));
+
+		// Allocate space for the temporaries
+		Symbol constantTempSize = st.addConstant(new Integer(callFunction.getTemps().size()));
+		function.add(Instruction.Add(constantTempSize));
+		function.add(Instruction.Store(st.getSP()));
+
+		// Allocate space for return value
+		function.add(Instruction.Add(constant1));
+		function.add(Instruction.Store(st.getSP()));
+
+		// Save previous FP
+		function.add(Instruction.Load(st.getFP()));
+		function.add(Instruction.Storei(st.getSP());
+		
+		// Update FP to be the start of this record
+		Symbol constantActivationSize = st.addConstant(new Integer(expressions.size() + callFunction.getVars().size() + callFunction.getTemps().size() + 1));
+		function.add(Instruction.Load(st.getSP()));
+		function.add(Instruction.Sub(constantActivationSize));
+		function.add(Instruction.Store(st.getFP()));
+
+		// Set the return address
+		function.add(Instruction.Load(st.getSP()));
+		function.add(Instruction.Add(constant1));
+		function.add(Instruction.Store(st.getSP()));
+		
 
 		function.add(Instruction.Jump(callFunction.getLabel()));
 
