@@ -624,7 +624,7 @@ class Program {
 
 	public void translate(SymbolTable st, FunctionTable ft) {
 		try {
-			function.add(Instruction.Jump(st.getMainLocation()));
+			//function.add(Instruction.Jump(st.getMainLocation()));
 			Proc mainProc = new Proc(new ParamList(), stmtlist);
 			DefineStatement main = new DefineStatement("main", mainProc);
 			main.translate(st, ft, null);
