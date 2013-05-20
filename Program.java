@@ -237,6 +237,7 @@ class FunctionCall extends Expr {
 	    function.add(Instruction.Load(st.getSP()));
 	    function.add(Instruction.Store(st.getFP()));
 	    function.add(Instruction.Add(numberOfVars));
+	    function.add(Instruction.Store(st.getFP()));
 	    function.add(Instruction.Jump(callFunction.getLabel()));
 
 		//TODO: this
