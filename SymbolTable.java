@@ -7,6 +7,8 @@ public class SymbolTable {
         private Symbol FP;
         private Symbol SP;
         private Symbol mainLocation;
+	private Symbol scratchSpace1;
+	private Symbol scratchSpace2;
 
 	private int labelCount;
 
@@ -14,6 +16,8 @@ public class SymbolTable {
                 FP = new Symbol("FP", Symbol.UNDEFINED, Symbol.BUILT_IN, Symbol.UNDEFINED);
                 SP = new Symbol("SP", Symbol.UNDEFINED, Symbol.BUILT_IN, Symbol.UNDEFINED);
                 mainLocation = new Symbol("MAIN", Symbol.UNDEFINED, Symbol.LABEL, Symbol.UNDEFINED);
+		scratchSpace1 = new Symbol("SCRATCH1", Symbol.UNDEFINED, Symbol.BUILT_IN, Symbol.UNDEFINED);
+		scratchSpace2 = new Symbol("SCRATCH1", Symbol.UNDEFINED, Symbol.BUILT_IN, Symbol.UNDEFINED);
                 
                 constants = new HashMap<String, Symbol>();
 
@@ -55,6 +59,14 @@ public class SymbolTable {
         public Symbol getSP() {
             return SP;
         }
+
+	public Symbol getScratch1() {
+		return scratchSpace1;
+	}
+
+	public Symbol getScratch2() {
+		return scratchSpace2;
+	}
 
         public Symbol getMainLocation() {
             return mainLocation;

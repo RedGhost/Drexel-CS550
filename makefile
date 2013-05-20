@@ -46,7 +46,7 @@ view-op : optimized.out
 	-$(pager) optimized.out
 
 run : linked.out
-	-$(ram) linked.out initialmemory.out
+	-$(ram) -m 100 linked.out initialmemory.out
 
 run-op: optimized.out
 	-$(ram) optimized.out initialmemory.out

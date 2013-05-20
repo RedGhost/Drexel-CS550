@@ -7,8 +7,11 @@ class Function {
 	private LinkedList<Instruction> instructions;
 	private HashMap<Integer, Symbol> labels;
 	private LinkedList<Symbol> tempSymbols;
-	private HashMap<String, Symbol> variableSymbols;
+	private HashMap<String, Symbol> variableSymbolsMap;
+	private LinkedList<Symbol> variableSymbols;
 	private HashMap<String, Symbol> parameterSymbols;
+	private int numParams;
+
 	private int startAddress;
 
 	private int labelCount;
@@ -19,21 +22,20 @@ class Function {
 		this.instructions = new LinkedList<Instruction>();
 		this.labels = new HashMap<Integer, Symbol>();
 		this.tempSymbols = new LinkedList<Symbol>();
-		this.variableSymbols = new HashMap<String, Symbol>();
-		this.parameterSymbols = new HashMap<String, Symbol>();
+		this.variableSymbolsMap = new HashMap<String, Symbol>();
+		this.variableSymbols = new LinkedList<Symbol>();
 		this.startAddress = -1;
+		this.numParams = 0;
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
-	public HashMap<String, Symbol> getVars() {
+	public LinkedList<Symbol> getVariables() {
 		return this.variableSymbols;
 	}
-	public HashMap<String, Symbol> getParams() {
-		return this.parameterSymbols;
-	}
+
 	public LinkedList<Symbol> getTemps() {
 		return this.tempSymbols;
 	}
@@ -42,14 +44,182 @@ class Function {
 		return this.label;
 	}
 
-	public void setStartingAddress(int address) {
-		this.startAddress = address;
+	public int getNumParams() {
+		return numParams;
+	}
+
+	public void link(SymbolTable st, FunctionTable ft, int startingAddress) {
+		this.startAddress = startingAddress;
+		LinkedList<Instruction> linkedInstructions = new LinkedList<Instruction>();
+		int i = 0;
+		for(Instruction instruction : instructions) {
+			if(labels.containsKey(new Integer(i))) {
+				labels.put(new Integer(linkedInstructions.size()), labels.remove(new Integer(i)));
+			}
+
+			// Fix load instructions
+			if(instruction.getOperator().equals("LD")) {
+				Symbol symbol = instruction.getSymbol();
+
+				int position = 0;
+				if(symbol.getType() == Symbol.VARIABLE) {
+					position = variableSymbols.indexOf(symbol);
+				}
+				else if(symbol.getType() == Symbol.TEMP) {
+					position = variableSymbols.size() + tempSymbols.indexOf(symbol);
+				}
+				else {
+					linkedInstructions.addLast(Instruction.Loadd(symbol));
+					continue;
+				}
+				// Get the proper space in memory
+				linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
+				if(position > 0) {
+					linkedInstructions.addLast(Instruction.Subtract(st.addConstant(new Integer(position))));
+				}
+				linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
+
+				// Load proper space in memory
+				linkedInstructions.addLast(Instruction.Loadi(st.getScratch1()));
+			}
+			// Fix Store instructions
+			else if(instruction.getOperator().equals("ST")) {
+				Symbol symbol = instruction.getSymbol();
+				int position = 0;
+				if(symbol.getType() == Symbol.VARIABLE) {
+					position = variableSymbols.indexOf(symbol);
+				}
+				else if(symbol.getType() == Symbol.TEMP) {
+					position = variableSymbols.size() + tempSymbols.indexOf(symbol);
+				}
+				else {
+					linkedInstructions.addLast(Instruction.Stored(symbol));
+					continue;
+				}
+
+				// Store current value in a scratch register
+				linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
+
+				// Calculate proper place to store
+				linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
+				if(position > 0) {
+					linkedInstructions.addLast(Instruction.Subtract(st.addConstant(new Integer(position))));
+				}
+
+				linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
+				linkedInstructions.addLast(Instruction.Loadd(st.getScratch1()));
+				linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
+			}
+			// Fix function call instructions
+			else if(instruction.getOperator().equals("CALu")) {
+				Symbol symbol = instruction.getSymbol();
+				if(symbol.getType() == Symbol.FUNCTION) {
+					Function callFunction = ft.get(symbol.getName());
+					LinkedList<Symbol> symbols = instruction.getSymbols();
+
+					if (callFunction.getNumParams() != symbols.size()) {
+						System.out.println("Syntax Error: Param count does not match");
+						System.exit(1);
+					}
+
+					// Place all the parameters at the start of the record
+					Symbol constant1 = st.addConstant(new Integer(1));
+					Symbol constant0 = st.addConstant(new Integer(0));
+
+					for (Symbol paramSymbol : symbols) {
+						int position = 0;
+						if(paramSymbol.getType() == Symbol.VARIABLE) {
+							position = variableSymbols.indexOf(paramSymbol);
+						}
+						else if(paramSymbol.getType() == Symbol.TEMP) {
+							position = variableSymbols.size() + tempSymbols.indexOf(paramSymbol);
+						}
+						else {
+							linkedInstructions.addLast(Instruction.Loadd(paramSymbol));
+							continue;
+						}
+						// Get the proper space in memory
+						linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
+						if(position > 0) {
+							linkedInstructions.addLast(Instruction.Subtract(st.addConstant(new Integer(position))));
+						}
+						linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
+
+						// Load proper space in memory
+						linkedInstructions.addLast(Instruction.Loadi(st.getScratch1()));
+
+						linkedInstructions.addLast(Instruction.Storei(st.getSP()));
+						linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+						linkedInstructions.addLast(Instruction.Add(constant1));
+						linkedInstructions.addLast(Instruction.Stored(st.getSP()));
+					}
+					if(symbols.size() == 0) {
+						linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+					}
+
+					// Allocate space for the variables and temporaries and return val
+					Symbol constantVarSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size() + 1));
+					linkedInstructions.addLast(Instruction.Add(constantVarSize));
+					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
+
+					// Save previous FP
+					linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
+					linkedInstructions.addLast(Instruction.Storei(st.getSP()));
+		
+					// Update FP to be the start of this record
+					Symbol constantActivationSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size() + 1));
+					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+					linkedInstructions.addLast(Instruction.Subtract(constantActivationSize));
+					linkedInstructions.addLast(Instruction.Stored(st.getFP()));
+
+					// Set the return address
+					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+					linkedInstructions.addLast(Instruction.Add(constant1));
+					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
+
+					// Call the Function
+					linkedInstructions.addLast(Instruction.Call(callFunction.getLabel()));
+
+					// Revert the FP
+					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+					linkedInstructions.addLast(Instruction.Subtract(constant1));
+					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
+					linkedInstructions.addLast(Instruction.Loadi(st.getSP()));
+					linkedInstructions.addLast(Instruction.Stored(st.getFP()));
+
+					// TODO: this
+					// Set the return value symbol
+					//Symbol returnTemp = function.addTemp();
+					//linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+					//linkedInstructions.addLast(Instruction.Subtract(constant1));
+					//linkedInstructions.addLast(Instruction.Stored(st.getSP()));
+					//linkedInstructions.addLast(Instruction.Loadi(st.getSP()));
+					//linkedInstructions.addLast(Instruction.Stored(returnTemp));
+
+					// Revert the SP
+					Symbol constantSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size()));
+					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+					linkedInstructions.addLast(Instruction.Subtract(constantSize));
+					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
+				}
+				else {
+					System.err.println("Fatal Exception!");
+					System.exit(1);
+				}
+			}
+			else {
+				linkedInstructions.addLast(instruction);
+			}
+			i++;
+		}
+		instructions = linkedInstructions;
+
 		if(label != null) {
-			label.setAddr(address);
+			label.setAddr(startingAddress);
 		}
 		for(Integer key : labels.keySet()) {
 			Symbol thisLabel = labels.get(key);
-			thisLabel.setAddr(key.intValue() + address);
+			thisLabel.setAddr(key.intValue() + startingAddress);
 		}
 	}
 
@@ -70,19 +240,27 @@ class Function {
 	}
 
 	public Symbol getVariable(String name) {
-		if(variableSymbols.containsKey(name)) {
-			return variableSymbols.get(name);
+		if(variableSymbolsMap.containsKey(name)) {
+			return variableSymbolsMap.get(name);
 		}
 		else {
 			Symbol newVariable = new Symbol(this.name + "::" + name, Symbol.UNDEFINED, Symbol.VARIABLE, Symbol.UNDEFINED);
-			variableSymbols.put(name, newVariable);
+			variableSymbolsMap.put(name, newVariable);
+			variableSymbols.addLast(newVariable);
 			return newVariable;
 		}
 	}
 
-	public void addParameter(String name) {
-		if(!parameterSymbols.containsKey(name)) {
-			parameterSymbols.put(name, new Symbol(this.name + "::" + name, Symbol.UNDEFINED, Symbol.VARIABLE, Symbol.UNDEFINED));
+	public Symbol addParameter(String name) {
+		if(variableSymbolsMap.containsKey(name)) {
+			return variableSymbolsMap.get(name);
+		}
+		else {
+			numParams++;
+			Symbol newVariable = new Symbol(this.name + "::" + name, Symbol.UNDEFINED, Symbol.VARIABLE, Symbol.UNDEFINED);
+			variableSymbolsMap.put(name, newVariable);
+			variableSymbols.addLast(newVariable);
+			return newVariable;
 		}
 	}
 

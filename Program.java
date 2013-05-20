@@ -219,78 +219,19 @@ class FunctionCall extends Expr {
 	}
 
 	public Symbol translate(SymbolTable st, FunctionTable ft, Function function) {
-	    	Function callFunction = ft.get(funcid);
-	   	int numVars = callFunction.getTemps().size() + callFunction.getVars().size() + callFunction.getParams().size() + 3;    	    	    	    
-
-	    	Symbol numberOfVars = st.addConstant(numVars);
-
-		if (callFunction.getParams().size() != explist.getExpressions().size()) {
-			System.out.println("Syntax Error: Param count does not match");
-			System.exit(1);
-		}
-
-		// Place all the parameters at the start of the record
-		Symbol constant1 = st.addConstant(new Integer(1));
-		Symbol constant0 = st.addConstant(new Integer(0));
+		LinkedList<Symbol> symbols = new LinkedList<Symbol>();
 		LinkedList<Expr> expressions = explist.getExpressions();
 		for (Expr expression : expressions) {
 			Symbol symbol = expression.translate(st, ft, function);
-			function.add(Instruction.Load(symbol));
-                        
-			function.add(Instruction.Storei(st.getSP()));
-			function.add(Instruction.Load(st.getSP()));
-			function.add(Instruction.Add(constant1));
-			function.add(Instruction.Store(st.getSP()));
-		}
-		if(expressions.size() == 0) {
-			function.add(Instruction.Load(st.getSP()));
+			symbols.addLast(symbol);
 		}
 
-		// Allocate space for the variables and temporaries and return val
-		Symbol constantVarSize = st.addConstant(new Integer(callFunction.getVars().size() + callFunction.getTemps().size() + 1));
-		function.add(Instruction.Add(constantVarSize));
-		function.add(Instruction.Store(st.getSP()));
+		Symbol functionSymbol = new Symbol(funcid, Symbol.UNDEFINED, Symbol.FUNCTION, Symbol.UNDEFINED);
+		function.add(Instruction.CallUnlinked(functionSymbol, symbols));
 
-		// Save previous FP
-		function.add(Instruction.Load(st.getFP()));
-		function.add(Instruction.Storei(st.getSP()));
-		
-		// Update FP to be the start of this record
-		Symbol constantActivationSize = st.addConstant(new Integer(expressions.size() + callFunction.getVars().size() + callFunction.getTemps().size() + 1));
-		function.add(Instruction.Load(st.getSP()));
-		function.add(Instruction.Subtract(constantActivationSize));
-		function.add(Instruction.Store(st.getFP()));
+// Todo: get a return here
+return function.addTemp();
 
-		// Set the return address
-		function.add(Instruction.Load(st.getSP()));
-		function.add(Instruction.Add(constant1));
-		function.add(Instruction.Store(st.getSP()));
-
-		// Call the Function
-		function.add(Instruction.Call(callFunction.getLabel()));
-
-		// Revert the FP
-		Symbol returnTemp = function.addTemp();
-                function.add(Instruction.Load(st.getSP()));
-		function.add(Instruction.Subtract(constant1));
-		function.add(Instruction.Store(st.getSP()));
-		function.add(Instruction.Loadi(st.getSP()));
-		function.add(Instruction.Store(st.getFP()));
-
-		// Set the return value symbol
-		function.add(Instruction.Load(st.getSP()));
-		function.add(Instruction.Subtract(constant1));
-		function.add(Instruction.Store(st.getSP()));
-		function.add(Instruction.Loadi(st.getSP()));
-		function.add(Instruction.Store(returnTemp));
-
-		// Revert the SP
-		Symbol constantSize = st.addConstant(new Integer(expressions.size() + callFunction.getVars().size() + callFunction.getTemps().size()));
-		function.add(Instruction.Load(st.getSP()));
-		function.add(Instruction.Subtract(constantSize));
-		function.add(Instruction.Store(st.getSP()));
-
-            return returnTemp; 
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
@@ -355,7 +296,15 @@ class ReturnStatement extends Statement {
 	}
 
 	public void translate(SymbolTable st, FunctionTable ft, Function function) {
-            // TODO
+//TODO: this
+            	/*Symbol c = expr.translate(st, ft, function);
+		Symbol temp = function.addTemp();
+		function.add(Instruction.Loadd(st.getSP()));
+		Symbol constant2 = st.addConstant(new Integer(2));
+		function.add(Instruction.Subtract(constant2));
+		function.add(Instruction.Store(temp));
+		function.add(Instruction.Load(c));
+		function.add(Instruction.Storei(temp));*/
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,

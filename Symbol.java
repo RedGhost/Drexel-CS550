@@ -5,6 +5,7 @@ public class Symbol {
     public static final int VARIABLE = 2;
     public static final int TEMP = 3;
     public static final int LABEL = 4;
+    public static final int FUNCTION = 5;
 
     private String name;
     private int value;
@@ -16,6 +17,10 @@ public class Symbol {
 	this.value = value;
 	this.type = type;
 	this.addr = addr;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public int getValue() {

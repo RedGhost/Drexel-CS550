@@ -12,18 +12,8 @@ public class Linker {
 	 *            - SymbolTable to update.
 	 */
         public void link(SymbolTable st, FunctionTable ft) {
-            int memoryAddr = 1;
-            st.getSP().setAddr(memoryAddr++);
-            st.getFP().setAddr(memoryAddr++);
-            
-            for(Symbol symbol : st.getConstants()) {
-              symbol.setAddr(memoryAddr++);
-            }
-
-            st.getSP().setValue(memoryAddr);
-            st.getFP().setValue(memoryAddr);
-
 	    Function primer = ft.get("primer");
+	    primer.link(st,ft,1);
 	    int addr = primer.numInstructions()+1;
 
 	    HashMap<String, Function> functions = ft.getFunctions();
@@ -33,7 +23,7 @@ public class Linker {
 		}
 
 		Function function = functions.get(functionName);
-		function.setStartingAddress(addr);
+		function.link(st, ft, addr);
 		if(functionName.equals("main")) {
 			st.getMainLocation().setValue(addr+1);
 		}
@@ -44,6 +34,19 @@ public class Linker {
 	    for(String functionName : functions.keySet()) {
 		Function function = functions.get(functionName);
 	    }
+
+	    int memoryAddr = 1;
+            st.getSP().setAddr(memoryAddr++);
+            st.getFP().setAddr(memoryAddr++);
+	    st.getScratch1().setAddr(memoryAddr++);
+	    st.getScratch2().setAddr(memoryAddr++);
+            
+            for(Symbol symbol : st.getConstants()) {
+              symbol.setAddr(memoryAddr++);
+            }
+
+            st.getSP().setValue(memoryAddr);
+            st.getFP().setValue(memoryAddr);
         }
 
         private void writeFile(String filename, String text) {
@@ -84,6 +87,8 @@ public class Linker {
 		StringBuilder builder = new StringBuilder();
 		builder.append(st.getSP().getAddr() + " " + st.getSP().getValue() + "\n");
 		builder.append(st.getFP().getAddr() + " " + st.getFP().getValue() + "\n");
+		builder.append(st.getScratch1().getAddr() + " " + st.getScratch1().getValue() + "\n");
+		builder.append(st.getScratch2().getAddr() + " " + st.getScratch2().getValue() + "\n");
 
             	for(Symbol symbol : st.getConstants()) {
 			builder.append(symbol.getAddr() + " " + symbol.getValue() + "\n");
