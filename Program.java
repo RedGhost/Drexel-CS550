@@ -225,8 +225,7 @@ class FunctionCall extends Expr {
 
 	    	Symbol numberOfVars = st.addConstant(numVars);
 
-		if (callFunction.getParams().size() != expressionlist
-				.getExpressions().size()) {
+		if (callFunction.getParams().size() != explist.getExpressions().size()) {
 			System.out.println("Syntax Error: Param count does not match");
 			System.exit(1);
 		}
@@ -241,11 +240,11 @@ class FunctionCall extends Expr {
 		Symbol constant1 = st.addConstant(new Integer(1));
 		Symbol constant0 = st.addConstant(new Integer(0));
 		LinkedList<Expr> expressions = explist.getExpressions();
-		while (Expr expression : expressions) {
+		for (Expr expression : expressions) {
 			Symbol symbol = expression.translate(st, ft, function);
 			function.add(Instruction.Load(symbol));
                         
-			function.add(Instruction.Storei(st.getSP());
+			function.add(Instruction.Storei(st.getSP()));
 			function.add(Instruction.Load(st.getSP()));
 			function.add(Instruction.Add(constant1));
 			function.add(Instruction.Store(st.getSP()));
@@ -267,12 +266,12 @@ class FunctionCall extends Expr {
 
 		// Save previous FP
 		function.add(Instruction.Load(st.getFP()));
-		function.add(Instruction.Storei(st.getSP());
+		function.add(Instruction.Storei(st.getSP()));
 		
 		// Update FP to be the start of this record
 		Symbol constantActivationSize = st.addConstant(new Integer(expressions.size() + callFunction.getVars().size() + callFunction.getTemps().size() + 1));
 		function.add(Instruction.Load(st.getSP()));
-		function.add(Instruction.Sub(constantActivationSize));
+		function.add(Instruction.Subtract(constantActivationSize));
 		function.add(Instruction.Store(st.getFP()));
 
 		// Set the return address
