@@ -97,10 +97,18 @@ class Function {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
                 int i = startAddress;
+		int j = 0;
 		for(Instruction instruction : instructions) {
-                        if(!instruction.isNOP()) {
-			    builder.append(instruction + "\n");
+			if(j == 0 && this.label != null) {
+                        	builder.append(this.label + ":\n");
                         }
+                    	if(labels.containsKey(new Integer(j))) {
+				builder.append(labels.get(new Integer(j)) + ":\n");
+			}
+                        if(!instruction.isNOP()) {
+			    	builder.append(instruction + "\n");
+                        }
+			j++;
 		}
 		return builder.toString();
 	}
