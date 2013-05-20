@@ -13,24 +13,29 @@ public class Linker {
 	 */
         public void link(SymbolTable st, FunctionTable ft) {
             int memoryAddr = 1;
-            st.getFP().setAddr(memoryAddr++);
             st.getSP().setAddr(memoryAddr++);
-            st.getMainLocation().setAddr(memoryAddr++);
+            st.getFP().setAddr(memoryAddr++);
             
             for(Symbol symbol : st.getConstants()) {
               symbol.setAddr(memoryAddr++);
             }
 
-            st.getFP().setValue(memoryAddr);
             st.getSP().setValue(memoryAddr);
+            st.getFP().setValue(memoryAddr);
 
-	    int addr = 1;
+	    Function primer = ft.get("primer");
+	    int addr = primer.numInstructions()+1;
+
 	    HashMap<String, Function> functions = ft.getFunctions();
 	    for(String functionName : functions.keySet()) {
+		if(functionName.equals("primer")) {
+			continue;
+		}
+
 		Function function = functions.get(functionName);
 		function.setStartingAddress(addr);
 		if(functionName.equals("main")) {
-			st.getMainLocation().setValue(addr);
+			st.getMainLocation().setValue(addr+1);
 		}
 
 		addr += function.numInstructions();
@@ -58,16 +63,15 @@ public class Linker {
 		System.out.println("Dumping out instructions to file " + output + "...");
 		StringBuilder builder = new StringBuilder();
 
-		FunctionCall mainCall = new FunctionCall("main", new ExpressionList());
+	    Function primer = ft.get("primer");
+	    builder.append(primer);
 
-		Function primerFunction = new Function("primer", null);
-		mainCall.translate(st, ft, primerFunction);
-
-                builder.append(primerFunction);
-                builder.append("HLT\n");
 
 		HashMap<String, Function> functions = ft.getFunctions();
 		for(String functionName : functions.keySet()) {
+			if(functionName.equals("primer")) {
+				continue;
+			}
 			Function function = functions.get(functionName);
 			builder.append(function);
 		}
@@ -78,9 +82,8 @@ public class Linker {
 	public void printInitialMemory(String output, SymbolTable st, FunctionTable ft) {
 		System.out.println("Dumping out initial memory to file " + output + "...");
 		StringBuilder builder = new StringBuilder();
-		builder.append(st.getFP().getAddr() + " " + st.getFP().getValue() + "\n");
 		builder.append(st.getSP().getAddr() + " " + st.getSP().getValue() + "\n");
-		builder.append(st.getMainLocation().getAddr() + " " + st.getMainLocation().getValue() + "\n");
+		builder.append(st.getFP().getAddr() + " " + st.getFP().getValue() + "\n");
 
             	for(Symbol symbol : st.getConstants()) {
 			builder.append(symbol.getAddr() + " " + symbol.getValue() + "\n");

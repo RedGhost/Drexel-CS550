@@ -265,12 +265,32 @@ class FunctionCall extends Expr {
 		function.add(Instruction.Load(st.getSP()));
 		function.add(Instruction.Add(constant1));
 		function.add(Instruction.Store(st.getSP()));
-		
 
-		function.add(Instruction.Jump(callFunction.getLabel()));
+		// Call the Function
+		function.add(Instruction.Call(callFunction.getLabel()));
 
-		//TODO: this
-            return null; 
+		// Revert the FP
+		Symbol returnTemp = function.addTemp();
+                function.add(Instruction.Load(st.getSP()));
+		function.add(Instruction.Subtract(constant1));
+		function.add(Instruction.Store(st.getSP()));
+		function.add(Instruction.Loadi(st.getSP()));
+		function.add(Instruction.Store(st.getFP()));
+
+		// Set the return value symbol
+		function.add(Instruction.Load(st.getSP()));
+		function.add(Instruction.Subtract(constant1));
+		function.add(Instruction.Store(st.getSP()));
+		function.add(Instruction.Loadi(st.getSP()));
+		function.add(Instruction.Store(returnTemp));
+
+		// Revert the SP
+		Symbol constantSize = st.addConstant(new Integer(expressions.size() + callFunction.getVars().size() + callFunction.getTemps().size()));
+		function.add(Instruction.Load(st.getSP()));
+		function.add(Instruction.Subtract(constantSize));
+		function.add(Instruction.Store(st.getSP()));
+
+            return returnTemp; 
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
@@ -654,10 +674,15 @@ class Program {
 
 	public void translate(SymbolTable st, FunctionTable ft) {
 		try {
-			//function.add(Instruction.Jump(st.getMainLocation()));
 			Proc mainProc = new Proc(new ParamList(), stmtlist);
 			DefineStatement main = new DefineStatement("main", mainProc);
 			main.translate(st, ft, null);
+
+			Function primerFunction = new Function("primer", null);
+			FunctionCall call = new FunctionCall("main", new ExpressionList());
+			call.translate(st, ft, primerFunction);
+			primerFunction.add(Instruction.Halt());
+			ft.addFunction(primerFunction);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());

@@ -44,7 +44,9 @@ class Function {
 
 	public void setStartingAddress(int address) {
 		this.startAddress = address;
-		label.setAddr(address);
+		if(label != null) {
+			label.setAddr(address);
+		}
 		for(Integer key : labels.keySet()) {
 			Symbol thisLabel = labels.get(key);
 			thisLabel.setAddr(key.intValue() + address);

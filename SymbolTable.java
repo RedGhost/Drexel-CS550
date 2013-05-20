@@ -13,7 +13,7 @@ public class SymbolTable {
 	public SymbolTable() {
                 FP = new Symbol("FP", Symbol.UNDEFINED, Symbol.BUILT_IN, Symbol.UNDEFINED);
                 SP = new Symbol("SP", Symbol.UNDEFINED, Symbol.BUILT_IN, Symbol.UNDEFINED);
-                mainLocation = new Symbol("MAIN", Symbol.UNDEFINED, Symbol.BUILT_IN, Symbol.UNDEFINED);
+                mainLocation = new Symbol("MAIN", Symbol.UNDEFINED, Symbol.LABEL, Symbol.UNDEFINED);
                 
                 constants = new HashMap<String, Symbol>();
 
