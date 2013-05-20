@@ -224,15 +224,15 @@ class FunctionCall extends Expr {
 	    
 	    Symbol numberOfVars = st.addConstant(numVars);
 	    
-	    int SP = st.getSP().getValue();
-	    int FP = SP;
-	    st.getFP().setValue(FP);
+	    //int SP = st.getSP().getValue();
+	    //int FP = SP;
+	    //st.getFP().setValue(FP);
 	    
-	    System.out.println("FuncID is " + funcid);
-	    System.out.println("CF has " + numVars + " vars and FP is " + FP + " SP = " + SP);
-	    SP = SP + numVars;
-	    st.getSP().setAddr(SP);
-	    System.out.println("SP is now " + SP);
+	    //System.out.println("FuncID is " + funcid);
+	    //System.out.println("CF has " + numVars + " vars and FP is " + FP + " SP = " + SP);
+	    //SP = SP + numVars;
+	    //st.getSP().setValue(SP);
+	    //System.out.println("SP is now " + SP);
 	    
 	    function.add(Instruction.Load(st.getSP()));
 	    function.add(Instruction.Store(st.getFP()));
