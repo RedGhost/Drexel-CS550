@@ -103,13 +103,13 @@ class Times extends Expr {
 	public Symbol translate(SymbolTable st, FunctionTable ft, Function function) {
             Symbol a =  expr1.translate(st, ft, function);
             Symbol b =  expr2.translate(st, ft, function);
-/* TODO: Multiplication
             function.add(Instruction.Load(a));
-            Symbol newTemp = st.addTemp();
-            function.add(Instruction.Store(newTemp));
-*/
-return null;
-	}
+            function.add(Instruction.Mul(b));
+	    Symbol c = function.addTemp();
+            function.add(Instruction.Store(c));
+            return c;
+	}            
+}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable) {
