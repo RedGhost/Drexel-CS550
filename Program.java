@@ -108,8 +108,7 @@ class Times extends Expr {
 	    Symbol c = function.addTemp();
             function.add(Instruction.Store(c));
             return c;
-	}            
-}
+	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,
 			HashMap<String, Proc> functiontable) {
