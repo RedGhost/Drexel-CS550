@@ -296,15 +296,8 @@ class ReturnStatement extends Statement {
 	}
 
 	public void translate(SymbolTable st, FunctionTable ft, Function function) {
-//TODO: this
-            	/*Symbol c = expr.translate(st, ft, function);
-		Symbol temp = function.addTemp();
-		function.add(Instruction.Loadd(st.getSP()));
-		Symbol constant2 = st.addConstant(new Integer(2));
-		function.add(Instruction.Subtract(constant2));
-		function.add(Instruction.Store(temp));
-		function.add(Instruction.Load(c));
-		function.add(Instruction.Storei(temp));*/
+		Symbol c = expr.translate(st, ft, function);
+		function.add(Instruction.ReturnUnlinked(c));
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,

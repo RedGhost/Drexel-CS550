@@ -207,6 +207,37 @@ class Function {
 					System.exit(1);
 				}
 			}
+			else if(instruction.getOperator().equals("RET")) {
+				Symbol returnSymbol = instruction.getSymbol();
+
+				int position = 0;
+				if(returnSymbol.getType() == Symbol.VARIABLE) {
+					position = variableSymbols.indexOf(returnSymbol);
+				}
+				else if(returnSymbol.getType() == Symbol.TEMP) {
+					position = variableSymbols.size() + tempSymbols.indexOf(returnSymbol);
+				}
+				else {
+					linkedInstructions.addLast(Instruction.Loadd(returnSymbol));
+					continue;
+				}
+				// Get the proper space in memory
+				linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
+				if(position > 0) {
+					linkedInstructions.addLast(Instruction.Subtract(st.addConstant(new Integer(position))));
+				}
+				linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
+
+				// Load proper space in memory
+				linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+				Symbol constant2 = st.addConstant(new Integer(2));
+				linkedInstructions.addLast(Instruction.Subtract(constant2));
+				linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
+				linkedInstructions.addLast(Instruction.Loadi(st.getScratch1()));
+				linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
+
+				// TODO: jump back to return address
+			}
 			else {
 				linkedInstructions.addLast(instruction);
 			}

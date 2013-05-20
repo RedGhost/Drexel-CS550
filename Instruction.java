@@ -45,6 +45,9 @@ class Instruction
     public static Instruction JumpIndirect(Symbol symbol) {
         return new Instruction("JMI", symbol);
     }
+    public static Instruction ReturnUnlinked(Symbol symbol) {
+        return new Instruction("RET", symbol);
+    }
     public static Instruction Call(Symbol symbol) {
         return new Instruction("CAL", symbol);
     }
