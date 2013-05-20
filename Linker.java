@@ -1,4 +1,4 @@
-import java.util.TreeMap;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.Stack;
 
@@ -15,7 +15,7 @@ public class Linker {
             st.getSP().setAddr(memoryAddr++);
             st.getMainLocation().setAddr(memoryAddr++);
             
-            for(Symbol symbol : st.getConstants) {
+            for(Symbol symbol : st.getConstants()) {
               symbol.setAddr(memoryAddr++);
             }
 
@@ -23,10 +23,10 @@ public class Linker {
             st.getSP().setValue(memoryAddr);
 
 	    HashMap<String, Function> functions = ft.getFunctions();
-	    for(String functionName : functions) {
-	        
+	    for(String functionName : functions.keySet()) {
+	        System.out.println(functionName);
 	    }
-             
+             /*
 	    int addr = 1;
 	    for (int l = 0; l < instructions.size(); l++) {
 		Symbol labelSymbol = st.getSymbol("L" + l);
@@ -34,7 +34,7 @@ public class Linker {
 		    labelSymbol.setAddr(addr);
 		}
 		addr += instructions.get(l).size();
-	    } 
+	    } */
         }
 
 	public String toString(SymbolTable st) {/*
