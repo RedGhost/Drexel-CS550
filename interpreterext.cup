@@ -50,8 +50,10 @@ program ::= statement_list:list
 	    {: Program program = new Program(list);
 	       //program.eval(hm, ft, st, t);
                program.translate(st, funcTable);
+               linker.printRAL("trans.out", st, funcTable);
                linker.link(st, funcTable);
-	      // program.dump(hm, ft, st, t);
+               linker.printRAL("linked.out", st, funcTable);
+               linker.printInitialMemory("initialmemory.out", st, funcTable);
 	     :};
 
 statement_list ::= statement:s

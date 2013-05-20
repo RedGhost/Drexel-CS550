@@ -37,16 +37,22 @@ class Function {
 		label.setAddr(address);
 		for(Integer key : labels.keySet()) {
 			Symbol thisLabel = labels.get(key);
-			thisLabel.setValue(key.intValue() + address);
+			thisLabel.setAddr(key.intValue() + address);
 		}
 	}
 
 	public int numInstructions() {
-		return instructions.size();
+                int count = 0;
+                for(Instruction instruction : instructions) {
+			if(!instruction.isNOP()) {
+				count ++;
+			}
+                }
+		return count;
 	}
 
 	public Symbol addTemp() {
-		Symbol newTemp = new Symbol(0, Symbol.TEMP, Symbol.UNDEFINED);
+		Symbol newTemp = new Symbol(name + "::T" + tempSymbols.size(), Symbol.UNDEFINED, Symbol.TEMP, Symbol.UNDEFINED);
 		tempSymbols.addLast(newTemp);
 		return newTemp;
 	}
@@ -56,7 +62,7 @@ class Function {
 			return variableSymbols.get(name);
 		}
 		else {
-			Symbol newVariable = new Symbol(0, Symbol.VARIABLE, Symbol.UNDEFINED);
+			Symbol newVariable = new Symbol(this.name + "::" + name, Symbol.UNDEFINED, Symbol.VARIABLE, Symbol.UNDEFINED);
 			variableSymbols.put(name, newVariable);
 			return newVariable;
 		}
@@ -64,7 +70,7 @@ class Function {
 
 	public void addParameter(String name) {
 		if(!parameterSymbols.containsKey(name)) {
-			parameterSymbols.put(name, new Symbol(0, Symbol.VARIABLE, Symbol.UNDEFINED));
+			parameterSymbols.put(name, new Symbol(this.name + "::" + name, Symbol.UNDEFINED, Symbol.VARIABLE, Symbol.UNDEFINED));
 		}
 	}
 
@@ -80,14 +86,11 @@ class Function {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append(name + "( ");
-		for(String paramName : parameterSymbols.keySet()) {
-			builder.append(paramName + ", ");
-		}
-		builder.append(" )\n");
                 int i = startAddress;
 		for(Instruction instruction : instructions) {
-			builder.append((i++) + " " + instruction + "\n");
+                        if(!instruction.isNOP()) {
+			    builder.append(instruction + "\n");
+                        }
 		}
 		return builder.toString();
 	}

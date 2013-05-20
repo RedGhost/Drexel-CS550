@@ -11,9 +11,9 @@ public class SymbolTable {
 	private int labelCount;
 
 	public SymbolTable() {
-                FP = new Symbol(1, Symbol.BUILT_IN, Symbol.UNDEFINED);
-                SP = new Symbol(2, Symbol.BUILT_IN, Symbol.UNDEFINED);
-                mainLocation = new Symbol(3, Symbol.BUILT_IN, Symbol.UNDEFINED);
+                FP = new Symbol("FP", Symbol.UNDEFINED, Symbol.BUILT_IN, Symbol.UNDEFINED);
+                SP = new Symbol("SP", Symbol.UNDEFINED, Symbol.BUILT_IN, Symbol.UNDEFINED);
+                mainLocation = new Symbol("MAIN", Symbol.UNDEFINED, Symbol.BUILT_IN, Symbol.UNDEFINED);
                 
                 constants = new HashMap<String, Symbol>();
 
@@ -21,7 +21,7 @@ public class SymbolTable {
 	}
 
 	public Symbol createLabel() {
-		Symbol newLabel = new Symbol(labelCount, Symbol.LABEL, Symbol.UNDEFINED);
+		Symbol newLabel = new Symbol("L" + labelCount, Symbol.UNDEFINED, Symbol.LABEL, Symbol.UNDEFINED);
 		labelCount++;
 		return newLabel;
 	}
@@ -62,7 +62,7 @@ public class SymbolTable {
 
 	public Symbol addConstant(Integer c) {
 		if (!constants.containsKey("C" + c.toString())) {
-			Symbol newConstant = new Symbol(c, Symbol.CONSTANT,
+			Symbol newConstant = new Symbol("C" + c, c, Symbol.CONSTANT,
 					Symbol.UNDEFINED);
 			constants.put("C" + c.toString(), newConstant);
 			return newConstant;

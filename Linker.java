@@ -1,6 +1,8 @@
 import java.util.HashMap;
 import java.util.Vector;
 import java.util.Stack;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 public class Linker {
 	/**
@@ -36,50 +38,55 @@ public class Linker {
 
 	    for(String functionName : functions.keySet()) {
 		Function function = functions.get(functionName);
-		System.out.println(function);
 	    }
         }
 
-	public String toString(SymbolTable st) {/*
-		System.out.println("instructions.size: " + instructions.size());
+        private void writeFile(String filename, String text) {
+	    try{
+		// Create file 
+		FileWriter fstream = new FileWriter(filename);
+		BufferedWriter out = new BufferedWriter(fstream);
+		out.write(text);
+		//Close the output stream
+		out.close();
+	    }catch (Exception e){//Catch exception if any
+		System.err.println("Error: " + e.getMessage());
+	    }
+        }
 
-		StringBuilder b = new StringBuilder();
+	public void printRAL(String output, SymbolTable st, FunctionTable ft) {
+		System.out.println("Dumping out instructions to file " + output + "...");
+		StringBuilder builder = new StringBuilder();
 
-		b.append("Translated Instructions:\n");
-		for (int l = 0; l < instructions.size(); l++) {
-		    if (l != 0) {
-			b.append("L" + l);
-		    }
-		    for (Instruction i : instructions.get(l)) {
-			String name = "";
-			if(i.getSymbol() != null){
-			    name = st.getName(i.getSymbol());
-			}
-			b.append((l != 0 ? "\t" : "") + i.getOperator() + " " + name + "\n");
-		    }
+		FunctionCall mainCall = new FunctionCall("main", new ExpressionList());
+
+		Function primerFunction = new Function("primer", null);
+		mainCall.translate(st, ft, primerFunction);
+
+                builder.append(primerFunction);
+                builder.append("HLT\n");
+
+		HashMap<String, Function> functions = ft.getFunctions();
+		for(String functionName : functions.keySet()) {
+			Function function = functions.get(functionName);
+			builder.append(function);
 		}
-		return b.toString();*/
-return "";
 
+		writeFile(output, builder.toString());
 	}
 
-	public String toStringLink(SymbolTable st) {/*
-		System.out.println("instructions.size: " + instructions.size());
+	public void printInitialMemory(String output, SymbolTable st, FunctionTable ft) {
+		System.out.println("Dumping out initial memory to file " + output + "...");
+		StringBuilder builder = new StringBuilder();
+		builder.append(st.getFP().getAddr() + " " + st.getFP().getValue() + "\n");
+		builder.append(st.getSP().getAddr() + " " + st.getSP().getValue() + "\n");
+		builder.append(st.getMainLocation().getAddr() + " " + st.getMainLocation().getValue() + "\n");
 
-		StringBuilder b = new StringBuilder();
+            	for(Symbol symbol : st.getConstants()) {
+			builder.append(symbol.getAddr() + " " + symbol.getValue() + "\n");
+            	}
 
-		for (int l = 0; l < instructions.size(); l++) {
-		    for (Instruction i : instructions.get(l)) {
-			if(i.getSymbol() != null){
-			    b.append(i.getOperator() + " " + i.getSymbol().getAddr() + "\n");
-			}
-			else {
-			    b.append(i.getOperator() + "\n");
-			}
-		    }
-		}
-		return b.toString();*/
-return "";
+		writeFile(output, builder.toString());
 	}
 
 	public void optimize(SymbolTable st) {
@@ -152,18 +159,4 @@ return "";
 		return b.toString();*/
 return "";
 	}
-
-        public String toStringInitialMemory(SymbolTable st) {/*
-            StringBuilder b = new StringBuilder();
-
-            b.append(st.getFP().getAddr() + ": " + st.getFP().getValue() + "\n");
-            b.append(st.getSP().getAddr() + ": " + st.getSP().getValue() + "\n");
-            b.append(st.getMainLocation().getAddr() + ": " + st.getMainLocation().getValue() + "\n");
-
-            for(Symbol symbol : st.getConstants) {
-              b.append(symbol.getAddr() + ": " + symbol.getValue() + "\n");
-            }
-            return b.toString();*/
-return"";
-        }
 }

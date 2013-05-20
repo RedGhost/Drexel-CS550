@@ -6,11 +6,13 @@ public class Symbol {
     public static final int TEMP = 3;
     public static final int LABEL = 4;
 
+    private String name;
     private int value;
     private int type;
     private int addr;
 
-    public Symbol(int value, int type, int addr) {
+    public Symbol(String name, int value, int type, int addr) {
+	this.name = name;
 	this.value = value;
 	this.type = type;
 	this.addr = addr;
@@ -37,17 +39,14 @@ public class Symbol {
     }
 
     @Override
-	public String toString() {
+    public String toString() {
 	StringBuilder b = new StringBuilder();
-	b.append("[" + value + ", ");
-	if (type == CONSTANT) {
-	    b.append("const, ");
-	} else if (type == VARIABLE) {
-	    b.append("var, ");
-	} else if (type == TEMP) {
-	    b.append("temp, ");
+	if(addr == UNDEFINED) {
+		b.append(name);
 	}
-	b.append(addr + "]");
+	else {
+		b.append(addr);
+	}
 	return b.toString();
     }
 }
