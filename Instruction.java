@@ -33,6 +33,9 @@ class Instruction
     public static Instruction JumpZero(Symbol symbol) {
         return new Instruction("JMZ", symbol);
     }
+    public static Instruction Jumpi(Symbol symbol) {
+        return new Instruction("JMI", symbol);
+    }
     public static Instruction Jump(Symbol symbol) {
         return new Instruction("JMP", symbol);
     }
