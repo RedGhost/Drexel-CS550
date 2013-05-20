@@ -306,8 +306,10 @@ class AssignStatement extends Statement {
 	}
 
 	public void translate(SymbolTable st, FunctionTable ft, Function function) {
-            Symbol c = function.getVariable(name); 
-            function.add(Instruction.Store(c));
+            Symbol c = expr.translate(st, ft, function);
+            function.add(Instruction.Load(c));
+            Symbol variable = function.getVariable(name);
+            function.add(Instruction.Store(variable));
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,

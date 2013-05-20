@@ -9,6 +9,7 @@ class Function {
 	private LinkedList<Symbol> tempSymbols;
 	private HashMap<String, Symbol> variableSymbols;
 	private HashMap<String, Symbol> parameterSymbols;
+	private int startAddress;
 
 	private int labelCount;
 	
@@ -20,10 +21,28 @@ class Function {
 		this.tempSymbols = new LinkedList<Symbol>();
 		this.variableSymbols = new HashMap<String, Symbol>();
 		this.parameterSymbols = new HashMap<String, Symbol>();
+		this.startAddress = -1;
 	}
 
 	public String getName() {
 		return this.name;
+	}
+
+	public Symbol getLabel() {
+		return this.label;
+	}
+
+	public void setStartingAddress(int address) {
+		this.startAddress = address;
+		label.setAddr(address);
+		for(Integer key : labels.keySet()) {
+			Symbol thisLabel = labels.get(key);
+			thisLabel.setValue(key.intValue() + address);
+		}
+	}
+
+	public int numInstructions() {
+		return instructions.size();
 	}
 
 	public Symbol addTemp() {
@@ -54,8 +73,23 @@ class Function {
 	}
 
 	public void add(Symbol label, Instruction instruction) {
-		instructions.addLast(instruction);
 		labels.put(new Integer(instructions.size()), label);
+		instructions.addLast(instruction);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(name + "( ");
+		for(String paramName : parameterSymbols.keySet()) {
+			builder.append(paramName + ", ");
+		}
+		builder.append(" )\n");
+                int i = startAddress;
+		for(Instruction instruction : instructions) {
+			builder.append((i++) + " " + instruction + "\n");
+		}
+		return builder.toString();
 	}
 }
 

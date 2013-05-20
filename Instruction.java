@@ -46,4 +46,13 @@ class Instruction
     public Symbol getSymbol(){
         return symbol;
     }
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(operator);
+        if(symbol != null) {
+            builder.append(" " + symbol.getValue());
+        }
+        return builder.toString();
+    }
 }

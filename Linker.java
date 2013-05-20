@@ -25,19 +25,19 @@ public class Linker {
 	    int addr = 1;
 	    HashMap<String, Function> functions = ft.getFunctions();
 	    for(String functionName : functions.keySet()) {
+		Function function = functions.get(functionName);
+		function.setStartingAddress(addr);
 		if(functionName.equals("main")) {
-			// Set address here to main Loc
+			st.getMainLocation().setValue(addr);
 		}
+
+		addr += function.numInstructions();
 	    }
-             /*
-	    int addr = 1;
-	    for (int l = 0; l < instructions.size(); l++) {
-		Symbol labelSymbol = st.getSymbol("L" + l);
-		if(labelSymbol != null){
-		    labelSymbol.setAddr(addr);
-		}
-		addr += instructions.get(l).size();
-	    } */
+
+	    for(String functionName : functions.keySet()) {
+		Function function = functions.get(functionName);
+		System.out.println(function);
+	    }
         }
 
 	public String toString(SymbolTable st) {/*
