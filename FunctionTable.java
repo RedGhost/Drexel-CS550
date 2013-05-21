@@ -260,7 +260,9 @@ class Function {
 				linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
 
 				// TODO: jump back to return address
-				linkedInstructions.addLast(Instruction.JumpIndirect(st.getSP()));
+				linkedInstructions.addLast(Instruction.Loadi(st.getSP()));
+				linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
+				linkedInstructions.addLast(Instruction.JumpIndirect(st.getScratch1()));
 			}
 			else {
 				linkedInstructions.addLast(instruction);
