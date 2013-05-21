@@ -101,10 +101,10 @@ class Times extends Expr {
 	public Symbol translate(SymbolTable st, FunctionTable ft, Function function) {
             Symbol a =  expr1.translate(st, ft, function);
             Symbol b =  expr2.translate(st, ft, function);
-            function.add(Instruction.Load(a));
-            function.add(Instruction.Mul(b));
+            function.add(PseudoInstruction.Loadu(a));
+            function.add(PseudoInstruction.Mulu(b));
 	    Symbol c = function.addTemp();
-            function.add(Instruction.Store(c));
+            function.add(PseudoInstruction.Storeu(c));
             return c;
 	}
 
@@ -163,10 +163,10 @@ class Plus extends Expr {
 	public Symbol translate(SymbolTable st, FunctionTable ft, Function function) {
             Symbol a =  expr1.translate(st, ft, function);
             Symbol b =  expr2.translate(st, ft, function);
-            function.add(Instruction.Load(a));
-            function.add(Instruction.Add(b));
+            function.add(PseudoInstruction.Loadu(a));
+            function.add(PseudoInstruction.Addu(b));
 	    Symbol c = function.addTemp();
-            function.add(Instruction.Store(c));
+            function.add(PseudoInstruction.Storeu(c));
             return c;
 	}
 
@@ -191,10 +191,10 @@ class Minus extends Expr {
 	public Symbol translate(SymbolTable st, FunctionTable ft, Function function) {
             Symbol a =  expr1.translate(st, ft, function);
             Symbol b =  expr2.translate(st, ft, function);
-            function.add(Instruction.Load(a));
-            function.add(Instruction.Subtract(b));
+            function.add(PseudoInstruction.Loadu(a));
+            function.add(PseudoInstruction.Subtractu(b));
             Symbol c = function.addTemp();
-            function.add(Instruction.Store(c));
+            function.add(PseudoInstruction.Storeu(c));
             return c;
 	}
 
@@ -229,7 +229,7 @@ class FunctionCall extends Expr {
 		Symbol functionSymbol = new Symbol(funcid, Symbol.UNDEFINED, Symbol.FUNCTION, Symbol.UNDEFINED);
 		Symbol returnSymbol = function.addTemp();
 
-		function.add(Instruction.CallUnlinked(functionSymbol, symbols, returnSymbol));
+		function.add(PseudoInstruction.CallUnlinked(functionSymbol, symbols, returnSymbol));
 
 		return returnSymbol;
 	}
@@ -278,7 +278,7 @@ class DefineStatement extends Statement {
 	    proc.translate(st, ft, newFunction);
 
 	    if(name.equals("main")) {
-		newFunction.add(Instruction.ReturnUnlinked(st.addConstant(new Integer(0))));
+		newFunction.add(PseudoInstruction.ReturnUnlinked(st.addConstant(new Integer(0))));
 	    }
 
 	    ft.addFunction(newFunction);
@@ -302,7 +302,7 @@ class ReturnStatement extends Statement {
 
 	public void translate(SymbolTable st, FunctionTable ft, Function function) {
 		Symbol c = expr.translate(st, ft, function);
-		function.add(Instruction.ReturnUnlinked(c));
+		function.add(PseudoInstruction.ReturnUnlinked(c));
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
@@ -327,9 +327,9 @@ class AssignStatement extends Statement {
 
 	public void translate(SymbolTable st, FunctionTable ft, Function function) {
             Symbol c = expr.translate(st, ft, function);
-            function.add(Instruction.Load(c));
+            function.add(PseudoInstruction.Loadu(c));
             Symbol variable = function.getVariable(name);
-            function.add(Instruction.Store(variable));
+            function.add(PseudoInstruction.Storeu(variable));
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
@@ -361,15 +361,15 @@ class IfStatement extends Statement {
             Symbol firstLabel = st.createLabel();
             Symbol secondLabel = st.createLabel();
 
-	    function.add(Instruction.Load(c));
+	    function.add(PseudoInstruction.Loadu(c));
 	    function.add(Instruction.JumpNegative(firstLabel));
 	    function.add(Instruction.JumpZero(firstLabel));
 	    stmtlist1.translate(st, ft, function);
 
 	    function.add(Instruction.Jump(secondLabel));
-	    function.add(firstLabel, Instruction.NOP());
+	    function.add(firstLabel, PseudoInstruction.NOP());
 	    stmtlist2.translate(st, ft, function);
-	    function.add(secondLabel, Instruction.NOP());
+	    function.add(secondLabel, PseudoInstruction.NOP());
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,
@@ -403,7 +403,7 @@ class WhileStatement extends Statement {
 	    Symbol secondLabel = st.createLabel();
 
 	    Symbol c = expr.translate(st, ft, function);
-	    function.add(firstLabel, Instruction.Load(c));
+	    function.add(firstLabel, PseudoInstruction.Loadu(c));
 
 	    function.add(Instruction.JumpNegative(secondLabel));
 	    function.add(Instruction.JumpZero(secondLabel));
@@ -411,7 +411,7 @@ class WhileStatement extends Statement {
 	    stmtlist.translate(st, ft, function);
 
 	    function.add(Instruction.Jump(firstLabel));
-	    function.add(secondLabel, Instruction.NOP());
+	    function.add(secondLabel, PseudoInstruction.NOP());
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,

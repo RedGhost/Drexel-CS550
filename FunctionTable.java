@@ -56,217 +56,13 @@ class Function {
 			if(labels.containsKey(new Integer(i))) {
 				labels.put(new Integer(linkedInstructions.size()), labels.remove(new Integer(i)));
 			}
-
-			// Fix load instructions
-			if(instruction.getOperator().equals("LD")) {
-				Symbol symbol = instruction.getSymbol();
-
-				int position = 0;
-				if(symbol.getType() == Symbol.VARIABLE) {
-					position = variableSymbols.indexOf(symbol);
-				}
-				else if(symbol.getType() == Symbol.TEMP) {
-					position = variableSymbols.size() + tempSymbols.indexOf(symbol);
-				}
-				else {
-					linkedInstructions.addLast(Instruction.Loadd(symbol));
-					continue;
-				}
-				// Get the proper space in memory
-				linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
-				if(position > 0) {
-					linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
-				}
-				linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
-
-				// Load proper space in memory
-				linkedInstructions.addLast(Instruction.Loadi(st.getScratch1()));
-			}
-			// Fix Store instructions
-			else if(instruction.getOperator().equals("ST")) {
-				Symbol symbol = instruction.getSymbol();
-				int position = 0;
-				if(symbol.getType() == Symbol.VARIABLE) {
-					position = variableSymbols.indexOf(symbol);
-				}
-				else if(symbol.getType() == Symbol.TEMP) {
-					position = variableSymbols.size() + tempSymbols.indexOf(symbol);
-				}
-				else {
-					linkedInstructions.addLast(Instruction.Stored(symbol));
-					continue;
-				}
-
-				// Store current value in a scratch register
-				linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
-
-				// Calculate proper place to store
-				linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
-				if(position > 0) {
-					linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
-				}
-
-				linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
-				linkedInstructions.addLast(Instruction.Loadd(st.getScratch1()));
-				linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
-			}
-			// Fix function call instructions
-			else if(instruction.getOperator().equals("CALu")) {
-				Symbol symbol = instruction.getSymbol();
-				if(symbol.getType() == Symbol.FUNCTION) {
-					Function callFunction = ft.get(symbol.getName());
-					LinkedList<Symbol> symbols = instruction.getSymbols();
-
-					if (callFunction.getNumParams() != symbols.size()) {
-						System.out.println("Syntax Error: Param count does not match");
-						System.exit(1);
-					}
-
-					// Place all the parameters at the start of the record
-					Symbol constant1 = st.addConstant(new Integer(1));
-					Symbol constant0 = st.addConstant(new Integer(0));
-
-					for (Symbol paramSymbol : symbols) {
-						int position = 0;
-						if(paramSymbol.getType() == Symbol.VARIABLE) {
-							position = variableSymbols.indexOf(paramSymbol);
-						}
-						else if(paramSymbol.getType() == Symbol.TEMP) {
-							position = variableSymbols.size() + tempSymbols.indexOf(paramSymbol);
-						}
-						else {
-							linkedInstructions.addLast(Instruction.Loadd(paramSymbol));
-							continue;
-						}
-						// Get the proper space in memory
-						linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
-						if(position > 0) {
-							linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
-						}
-						linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
-
-						// Load proper space in memory
-						linkedInstructions.addLast(Instruction.Loadi(st.getScratch1()));
-
-						linkedInstructions.addLast(Instruction.Storei(st.getSP()));
-						linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-						linkedInstructions.addLast(Instruction.Add(constant1));
-						linkedInstructions.addLast(Instruction.Stored(st.getSP()));
-					}
-					if(symbols.size() == 0) {
-						linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-					}
-
-					// Allocate space for the variables and temporaries and return val
-					Symbol constantVarSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size() + 1));
-					linkedInstructions.addLast(Instruction.Add(constantVarSize));
-					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
-
-					// Save previous FP
-					linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
-					linkedInstructions.addLast(Instruction.Storei(st.getSP()));
-		
-					// Update FP to be the start of this record
-					Symbol constantActivationSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size() + 1));
-					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-					linkedInstructions.addLast(Instruction.Subtract(constantActivationSize));
-					linkedInstructions.addLast(Instruction.Stored(st.getFP()));
-
-					// Set the return address
-					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-					linkedInstructions.addLast(Instruction.Add(constant1));
-					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
-
-					// Call the Function
-					linkedInstructions.addLast(Instruction.Call(callFunction.getLabel(), callFunction.getName()));
-
-					// Set the return value symbol
-					Symbol returnTemp = instruction.getReturnSymbol();
-					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-					Symbol constant2 = st.addConstant(new Integer(2));
-					linkedInstructions.addLast(Instruction.Subtract(constant2));
-					linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
-					linkedInstructions.addLast(Instruction.Loadi(st.getScratch1()));
-
-					if(returnTemp.getType() == Symbol.TEMP) {
-						int position = variableSymbols.size() + tempSymbols.indexOf(returnTemp);
-
-						// Store current value in a scratch register
-						linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
-
-						// Calculate proper place to store
-						linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
-						if(position > 0) {
-							linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
-						}
-
-						linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
-						linkedInstructions.addLast(Instruction.Loadd(st.getScratch1()));
-						linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
-					}
-					else {
-						linkedInstructions.addLast(Instruction.Stored(returnTemp));
-					}
-					// Return value has now been stored in temporary symbol
-
-					// Revert the FP
-					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-					linkedInstructions.addLast(Instruction.Subtract(constant1));
-					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
-					linkedInstructions.addLast(Instruction.Loadi(st.getSP()));
-					linkedInstructions.addLast(Instruction.Stored(st.getFP()));
-
-					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-					linkedInstructions.addLast(Instruction.Subtract(constant1));
-					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
-
-					// Revert the SP
-					Symbol constantSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size()));
-					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-					linkedInstructions.addLast(Instruction.Subtract(constantSize));
-					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
-				}
-				else {
-					System.err.println("Fatal Exception!");
-					System.exit(1);
-				}
-			}
-			else if(instruction.getOperator().equals("RET")) {
-				Symbol returnSymbol = instruction.getSymbol();
-
-				int position = 0;
-				if(returnSymbol.getType() == Symbol.VARIABLE) {
-					position = variableSymbols.indexOf(returnSymbol);
-				}
-				else if(returnSymbol.getType() == Symbol.TEMP) {
-					position = variableSymbols.size() + tempSymbols.indexOf(returnSymbol);
-				}
-				else {
-					linkedInstructions.addLast(Instruction.Loadd(returnSymbol));
-				}
-				// Get the proper space in memory
-				linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
-				if(position > 0) {
-					linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
-				}
-				linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
-
-				// Load proper space in memory
-				linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-				Symbol constant2 = st.addConstant(new Integer(2));
-				linkedInstructions.addLast(Instruction.Subtract(constant2));
-				linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
-				linkedInstructions.addLast(Instruction.Loadi(st.getScratch1()));
-				linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
-
-				// TODO: jump back to return address
-				linkedInstructions.addLast(Instruction.Loadi(st.getSP()));
-				linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
-				linkedInstructions.addLast(Instruction.JumpIndirect(st.getScratch1()));
+			if(instruction instanceof PseudoInstruction) {
+				((PseudoInstruction)instruction).link(st, ft, this, linkedInstructions);
 			}
 			else {
 				linkedInstructions.addLast(instruction);
 			}
+
 			i++;
 		}
 		instructions = linkedInstructions;
@@ -281,13 +77,7 @@ class Function {
 	}
 
 	public int numInstructions() {
-                int count = 0;
-                for(Instruction instruction : instructions) {
-			if(!instruction.isNOP()) {
-				count ++;
-			}
-                }
-		return count;
+		return instructions.size();
 	}
 
 	public Symbol addTemp() {
@@ -335,16 +125,14 @@ class Function {
 		StringBuilder builder = new StringBuilder();
 		int j = 0;
 		for(Instruction instruction : instructions) {
-                        if(!instruction.isNOP()) {
-			    	builder.append(instruction);
-				if(j == 0 && this.label != null) {
-                        		builder.append("\t; " + this.label);
-                        	}
-                    		if(labels.containsKey(new Integer(j))) {
-					builder.append("\t; " + labels.get(new Integer(j)));
-				}
-				builder.append("\n");
-                        }
+		    	builder.append(instruction);
+			if(j == 0 && this.label != null) {
+                		builder.append("\t; " + this.label);
+                	}
+            		if(labels.containsKey(new Integer(j))) {
+				builder.append("\t; " + labels.get(new Integer(j)));
+			}
+			builder.append("\n");
 			j++;
 		}
 		return builder.toString();
