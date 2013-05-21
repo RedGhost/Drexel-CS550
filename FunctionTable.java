@@ -233,7 +233,6 @@ class Function {
 				}
 				else {
 					linkedInstructions.addLast(Instruction.Loadd(returnSymbol));
-					continue;
 				}
 				// Get the proper space in memory
 				linkedInstructions.addLast(Instruction.Loadd(st.getFP()));

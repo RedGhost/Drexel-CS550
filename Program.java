@@ -275,6 +275,11 @@ class DefineStatement extends Statement {
 	    }
             Function newFunction = new Function(name, label);
 	    proc.translate(st, ft, newFunction);
+
+	    if(name.equals("main")) {
+		newFunction.add(Instruction.ReturnUnlinked(st.addConstant(new Integer(0))));
+	    }
+
 	    ft.addFunction(newFunction);
 	}
 
