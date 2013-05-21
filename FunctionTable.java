@@ -183,9 +183,10 @@ class Function {
 					// Set the return value symbol
 					Symbol returnTemp = instruction.getReturnSymbol();
 					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-					linkedInstructions.addLast(Instruction.Subtract(constant1));
-					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
-					linkedInstructions.addLast(Instruction.Loadi(st.getSP()));
+					Symbol constant2 = st.addConstant(new Integer(2));
+					linkedInstructions.addLast(Instruction.Subtract(constant2));
+					linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
+					linkedInstructions.addLast(Instruction.Loadi(st.getScratch1()));
 
 					int position = variableSymbols.size() + tempSymbols.indexOf(returnTemp);
 
@@ -209,6 +210,10 @@ class Function {
 					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
 					linkedInstructions.addLast(Instruction.Loadi(st.getSP()));
 					linkedInstructions.addLast(Instruction.Stored(st.getFP()));
+
+					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+					linkedInstructions.addLast(Instruction.Subtract(constant1));
+					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
 
 					// Revert the SP
 					Symbol constantSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size()));
