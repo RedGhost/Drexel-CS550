@@ -14,9 +14,9 @@
 - build:    'make compile'
 - details:
   The compile method requires a file or instructions to be given. When that happens it will generate
-  a non-linked file (trans.out) a fully linked an runnable file (link.out), an optimized linked file
-  (optimized.out), and an initial memory file (initialmemory.out). These files can be run using the
-  RAL interpreter to produce the desired effect. 
+  a non-linked file (trans.out) a fully linked an runnable file (link.out),and an initial memory file (initialmemory.out).
+  These files can be run using the RAL interpreter to produce the desired effect.
+  Updated for Assignment 4 includes proc routines.
 - Viewing files:
   Once make compile is run you can view the various files that were produced using this command:
   make view-trans   - displays the pre-linked file
