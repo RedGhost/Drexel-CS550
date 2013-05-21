@@ -75,7 +75,7 @@ class Function {
 				// Get the proper space in memory
 				linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
 				if(position > 0) {
-					linkedInstructions.addLast(Instruction.Subtract(st.addConstant(new Integer(position))));
+					linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
 				}
 				linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
 
@@ -103,7 +103,7 @@ class Function {
 				// Calculate proper place to store
 				linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
 				if(position > 0) {
-					linkedInstructions.addLast(Instruction.Subtract(st.addConstant(new Integer(position))));
+					linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
 				}
 
 				linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
@@ -141,7 +141,7 @@ class Function {
 						// Get the proper space in memory
 						linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
 						if(position > 0) {
-							linkedInstructions.addLast(Instruction.Subtract(st.addConstant(new Integer(position))));
+							linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
 						}
 						linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
 
@@ -195,7 +195,7 @@ class Function {
 					// Calculate proper place to store
 					linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
 					if(position > 0) {
-						linkedInstructions.addLast(Instruction.Subtract(st.addConstant(new Integer(position))));
+						linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
 					}
 
 					linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
@@ -237,7 +237,7 @@ class Function {
 				// Get the proper space in memory
 				linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
 				if(position > 0) {
-					linkedInstructions.addLast(Instruction.Subtract(st.addConstant(new Integer(position))));
+					linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
 				}
 				linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
 
@@ -323,16 +323,15 @@ class Function {
 		StringBuilder builder = new StringBuilder();
 		int j = 0;
 		for(Instruction instruction : instructions) {
-			if(startAddress < 0) {
-			if(j == 0 && this.label != null) {
-                        	builder.append(this.label + ":\n");
-                        }
-                    	if(labels.containsKey(new Integer(j))) {
-				builder.append(labels.get(new Integer(j)) + ":\n");
-			}
-                        }
                         if(!instruction.isNOP()) {
-			    	builder.append(instruction + "\n");
+			    	builder.append(instruction);
+				if(j == 0 && this.label != null) {
+                        		builder.append("\t; " + this.label);
+                        	}
+                    		if(labels.containsKey(new Integer(j))) {
+					builder.append("\t; " + labels.get(new Integer(j)));
+				}
+				builder.append("\n");
                         }
 			j++;
 		}
