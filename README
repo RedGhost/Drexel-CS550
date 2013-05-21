@@ -31,6 +31,7 @@
   Linker.java         - Links the symbols to RAL instructions
   FunctionTable.java  - Contains Function and FunctionTable classes
   Instruction.java    - Class representing a RAL instruction
+  PseudoInstruction.java - Class storing pseudo RAL instructions that get linked to real instructions.
 
 ### Testing ###
 Testing was done by running against the sample input files.

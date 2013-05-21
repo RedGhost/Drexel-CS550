@@ -23,7 +23,7 @@ RAM_MEM ?= 100
 # run-op — invoke ~jjohnson/bin/ram to run your optimised program. If you didn't provide optimisation, echo "NOT IMPLEMENTED"
 # clean — remove all binaries and intermediate files
 
-view : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java
+view : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java PseudoInstruction.java
 	-$(pager) interpreterext.cup
 	-$(pager) interpreterext.flex
 	-$(pager) Program.java
@@ -32,11 +32,12 @@ view : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Link
 	-$(pager) Symbol.java
 	-$(pager) FunctionTable.java
 	-$(pager) Instruction.java
+	-$(pager) PseudoInstruction.java
 
-compile : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java
+compile : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java PseudoInstruction.java
 	$(java) -classpath $(CLASSPATH) java_cup.Main interpreterext.cup
 	$(lex) interpreterext.flex
-	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java
+	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java PseudoInstruction.java
 	$(java) -classpath $(CLASSPATH) parser
 
 view-trans : trans.out
@@ -47,9 +48,6 @@ view-link : linked.out
 
 run : linked.out
 	-$(ram) -m $(RAM_MEM) linked.out initialmemory.out
-
-run-op: optimized.out
-	-$(ram) optimized.out initialmemory.out
 
 clean :
 	-\rm -v *.class
