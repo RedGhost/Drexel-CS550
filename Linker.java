@@ -66,6 +66,7 @@ public class Linker {
 		System.out.println("Dumping out instructions to file " + output + "...");
 		StringBuilder builder = new StringBuilder();
 
+//builder.append("Primer()\n");
 	    Function primer = ft.get("primer");
 	    builder.append(primer);
 
@@ -75,6 +76,7 @@ public class Linker {
 			if(functionName.equals("primer")) {
 				continue;
 			}
+//builder.append(functionName + "()\n");
 			Function function = functions.get(functionName);
 			builder.append(function);
 		}

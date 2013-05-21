@@ -251,6 +251,7 @@ class Function {
 				linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
 
 				// TODO: jump back to return address
+				linkedInstructions.addLast(Instruction.JumpIndirect(st.getSP()));
 			}
 			else {
 				linkedInstructions.addLast(instruction);
