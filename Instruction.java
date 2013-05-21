@@ -4,6 +4,7 @@ class Instruction
 {
     private String operator;
     private Symbol symbol;
+    private Symbol returnSymbol;
     private LinkedList<Symbol> symbols;
 
     public static Instruction NOP() {
@@ -51,8 +52,8 @@ class Instruction
     public static Instruction Call(Symbol symbol) {
         return new Instruction("CAL", symbol);
     }
-    public static Instruction CallUnlinked(Symbol symbol, LinkedList<Symbol> symbols) {
-        return new Instruction("CALu", symbol, symbols);
+    public static Instruction CallUnlinked(Symbol symbol, LinkedList<Symbol> symbols, Symbol returnSymbol) {
+        return new Instruction("CALu", symbol, symbols, returnSymbol);
     }
     public static Instruction Jump(Symbol symbol) {
         return new Instruction("JMP", symbol);
@@ -73,12 +74,23 @@ class Instruction
 	this.symbols = symbols;
     }
 
+    public Instruction(String operator, Symbol symbol, LinkedList<Symbol> symbols, Symbol returnSymbol){
+        this.operator = operator;
+        this.symbol = symbol;
+	this.symbols = symbols;
+	this.returnSymbol = returnSymbol;
+    }
+
     public String getOperator(){
         return operator;
     }
 
     public Symbol getSymbol(){
         return symbol;
+    }
+
+    public Symbol getReturnSymbol(){
+        return returnSymbol;
     }
 
     public LinkedList<Symbol> getSymbols(){

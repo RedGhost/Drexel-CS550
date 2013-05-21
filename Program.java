@@ -227,11 +227,10 @@ class FunctionCall extends Expr {
 		}
 
 		Symbol functionSymbol = new Symbol(funcid, Symbol.UNDEFINED, Symbol.FUNCTION, Symbol.UNDEFINED);
-		function.add(Instruction.CallUnlinked(functionSymbol, symbols));
+		Symbol returnSymbol = function.addTemp();
+		function.add(Instruction.CallUnlinked(functionSymbol, symbols, returnSymbol));
 
-// Todo: get a return here
-return function.addTemp();
-
+		return returnSymbol;
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable,

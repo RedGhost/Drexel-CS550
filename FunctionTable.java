@@ -180,21 +180,35 @@ class Function {
 					// Call the Function
 					linkedInstructions.addLast(Instruction.Call(callFunction.getLabel()));
 
+					// Set the return value symbol
+					Symbol returnTemp = instruction.getReturnSymbol();
+					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+					linkedInstructions.addLast(Instruction.Subtract(constant1));
+					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
+					linkedInstructions.addLast(Instruction.Loadi(st.getSP()));
+
+					int position = variableSymbols.size() + tempSymbols.indexOf(returnTemp);
+
+					// Store current value in a scratch register
+					linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
+
+					// Calculate proper place to store
+					linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
+					if(position > 0) {
+						linkedInstructions.addLast(Instruction.Subtract(st.addConstant(new Integer(position))));
+					}
+
+					linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
+					linkedInstructions.addLast(Instruction.Loadd(st.getScratch1()));
+					linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
+					// Return value has now been stored in temporary symbol
+
 					// Revert the FP
 					linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
 					linkedInstructions.addLast(Instruction.Subtract(constant1));
 					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
 					linkedInstructions.addLast(Instruction.Loadi(st.getSP()));
 					linkedInstructions.addLast(Instruction.Stored(st.getFP()));
-
-					// TODO: this
-					// Set the return value symbol
-					//Symbol returnTemp = function.addTemp();
-					//linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
-					//linkedInstructions.addLast(Instruction.Subtract(constant1));
-					//linkedInstructions.addLast(Instruction.Stored(st.getSP()));
-					//linkedInstructions.addLast(Instruction.Loadi(st.getSP()));
-					//linkedInstructions.addLast(Instruction.Stored(returnTemp));
 
 					// Revert the SP
 					Symbol constantSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size()));
@@ -307,7 +321,6 @@ class Function {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-                int i = startAddress;
 		int j = 0;
 		for(Instruction instruction : instructions) {
 			if(startAddress < 0) {
