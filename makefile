@@ -6,6 +6,7 @@ CLASSPATH=./:$(cup_location):$(cup_runtime)
 lex=jflex
 pager=less
 ram=./ram
+RAM_MEM ?= 100
 
 .PHONY : view compile view-trans view-link view-op run run-op clean
 # view — display (using the more utility) all of your source code (excluding the modified RAM)
@@ -46,7 +47,10 @@ view-op : optimized.out
 	-$(pager) optimized.out
 
 run : linked.out
-	-$(ram) -m 100 linked.out initialmemory.out
+	-$(ram) -m $(RAM_MEM) linked.out initialmemory.out
+
+run-op: optimized.out
+	-$(ram) optimized.out initialmemory.out
 
 clean :
 	-\rm -v *.class
