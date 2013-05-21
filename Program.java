@@ -438,7 +438,16 @@ class RepeatStatement extends Statement {
 	}
 
 	public void translate(SymbolTable st, FunctionTable ft, Function function) {
-		// TODO:
+		Symbol firstLabel = st.createLabel();
+		Symbol secondLabel = st.createLabel();
+		function.add(firstLabel, PseudoInstruction.NOP());
+	        sl.translate(st, ft, function);
+		Symbol c = expr.translate(st, ft, function);
+	   	function.add(PseudoInstruction.Loadu(c));
+		function.add(Instruction.JumpNegative(secondLabel));
+		function.add(Instruction.JumpZero(secondLabel));
+		function.add(Instruction.Jump(firstLabel));
+		function.add(secondLabel, PseudoInstruction.NOP());
 	}
 
 	public void eval(HashMap<String, ValueType> nametable,

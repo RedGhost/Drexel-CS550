@@ -107,9 +107,9 @@ public class Linker {
 			builder.append(addr + " 0\t; " + symbol.getName() + "\n");
 			addr++;
 		}
-		builder.append((addr++) + " 0\t; main return value\n");
-		builder.append((addr++) + " 0\t; Previous FP\n");
-		builder.append((addr++) + " " + main.numInstructions() + "\t; Return address\n");
+		builder.append((addr++) + " 0\t; Main Return Value\n");
+		builder.append((addr++) + " 0\t; Main's Previous FP (not used)\n");
+		builder.append((addr++) + " " + main.numInstructions() + "\t; Main's Return Address (HLT at the end)\n");
 
 		writeFile(output, builder.toString());
 	}
