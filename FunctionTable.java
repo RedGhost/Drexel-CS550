@@ -178,7 +178,7 @@ class Function {
 					linkedInstructions.addLast(Instruction.Stored(st.getSP()));
 
 					// Call the Function
-					linkedInstructions.addLast(Instruction.Call(callFunction.getLabel()));
+					linkedInstructions.addLast(Instruction.Call(callFunction.getLabel(), callFunction.getName()));
 
 					// Set the return value symbol
 					Symbol returnTemp = instruction.getReturnSymbol();

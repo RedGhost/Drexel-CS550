@@ -50,8 +50,11 @@ class Instruction
     public static Instruction ReturnUnlinked(Symbol symbol) {
         return new Instruction("RET", symbol);
     }
-    public static Instruction Call(Symbol symbol) {
-        return new Instruction("CAL", symbol, symbol.getName());
+    // public static Instruction Call(Symbol symbol) {
+    //     return new Instruction("CAL", symbol);
+    // }
+    public static Instruction Call(Symbol symbol, String name) {
+        return new Instruction("CAL", symbol, name);
     }
     public static Instruction CallUnlinked(Symbol symbol, LinkedList<Symbol> symbols, Symbol returnSymbol) {
         return new Instruction("CALu", symbol, symbols, returnSymbol);
