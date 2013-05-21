@@ -23,13 +23,15 @@ RAM_MEM ?= 100
 # run-op — invoke ~jjohnson/bin/ram to run your optimised program. If you didn't provide optimisation, echo "NOT IMPLEMENTED"
 # clean — remove all binaries and intermediate files
 
-view : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Linker.java Symbol.java
+view : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java
 	-$(pager) interpreterext.cup
 	-$(pager) interpreterext.flex
 	-$(pager) Program.java
 	-$(pager) SymbolTable.java
-	-$(pager) Translator.java
+	-$(pager) Linker.java
 	-$(pager) Symbol.java
+	-$(pager) FunctionTable.java
+	-$(pager) Instruction.java
 
 compile : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java
 	$(java) -classpath $(CLASSPATH) java_cup.Main interpreterext.cup
