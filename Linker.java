@@ -87,13 +87,13 @@ public class Linker {
 	public void printInitialMemory(String output, SymbolTable st, FunctionTable ft) {
 		System.out.println("Dumping out initial memory to file " + output + "...");
 		StringBuilder builder = new StringBuilder();
-		builder.append(st.getSP().getAddr() + " " + st.getSP().getValue() + "\n");
-		builder.append(st.getFP().getAddr() + " " + st.getFP().getValue() + "\n");
-		builder.append(st.getScratch1().getAddr() + " " + st.getScratch1().getValue() + "\n");
-		builder.append(st.getScratch2().getAddr() + " " + st.getScratch2().getValue() + "\n");
+		builder.append(st.getSP().getAddr() + " " + st.getSP().getValue() + "\t; SP\n");
+		builder.append(st.getFP().getAddr() + " " + st.getFP().getValue() + "\t; FP\n");
+		builder.append(st.getScratch1().getAddr() + " " + st.getScratch1().getValue() + "\t; SCRATCH 1\n");
+		builder.append(st.getScratch2().getAddr() + " " + st.getScratch2().getValue() + "\t; SCRATCH 2\n");
 
             	for(Symbol symbol : st.getConstants()) {
-			builder.append(symbol.getAddr() + " " + symbol.getValue() + "\n");
+		    builder.append(symbol.getAddr() + " " + symbol.getValue() + "\t; " + symbol.getName() + "\n");
             	}
 
 		writeFile(output, builder.toString());

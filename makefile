@@ -48,9 +48,6 @@ view-op : optimized.out
 run : linked.out
 	-$(ram) -m 100 linked.out initialmemory.out
 
-run-op: optimized.out
-	-$(ram) optimized.out initialmemory.out
-
 clean :
 	-\rm -v *.class
 	-\rm -v parser.java
