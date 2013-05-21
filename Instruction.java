@@ -6,6 +6,7 @@ class Instruction
     private Symbol symbol;
     private Symbol returnSymbol;
     private LinkedList<Symbol> symbols;
+    private String comment;
 
     public static Instruction NOP() {
         return new Instruction("NOP", null);
@@ -50,7 +51,7 @@ class Instruction
         return new Instruction("RET", symbol);
     }
     public static Instruction Call(Symbol symbol) {
-        return new Instruction("CAL", symbol);
+        return new Instruction("CAL", symbol, symbol.getName());
     }
     public static Instruction CallUnlinked(Symbol symbol, LinkedList<Symbol> symbols, Symbol returnSymbol) {
         return new Instruction("CALu", symbol, symbols, returnSymbol);
@@ -66,6 +67,11 @@ class Instruction
         this.operator = operator;
         this.symbol = symbol;
 	this.symbols = new LinkedList<Symbol>();
+    }
+
+    public Instruction(String operator, Symbol symbol, String comment){
+	this(operator, symbol);
+	this.comment = comment;
     }
 
     public Instruction(String operator, Symbol symbol, LinkedList<Symbol> symbols){
@@ -107,6 +113,9 @@ class Instruction
         if(symbol != null) {
             builder.append(" " + symbol);
         }
+	if(comment != null) {
+	    builder.append("\t; " + comment);
+	}
         return builder.toString();
     }
 }
