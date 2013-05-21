@@ -51,11 +51,14 @@ class Function {
 	public void link(SymbolTable st, FunctionTable ft, int startingAddress) {
 		this.startAddress = startingAddress;
 		LinkedList<Instruction> linkedInstructions = new LinkedList<Instruction>();
+		HashMap<Integer, Symbol> linkedLabels = new HashMap<Integer, Symbol>();
+
 		int i = 0;
 		for(Instruction instruction : instructions) {
 			if(labels.containsKey(new Integer(i))) {
-				labels.put(new Integer(linkedInstructions.size()), labels.remove(new Integer(i)));
+				linkedLabels.put(new Integer(linkedInstructions.size()), labels.get(new Integer(i)));
 			}
+
 			if(instruction instanceof PseudoInstruction) {
 				((PseudoInstruction)instruction).link(st, ft, this, linkedInstructions);
 			}
@@ -70,6 +73,7 @@ class Function {
 		if(label != null) {
 			label.setAddr(startingAddress);
 		}
+		labels = linkedLabels;
 		for(Integer key : labels.keySet()) {
 			Symbol thisLabel = labels.get(key);
 			thisLabel.setAddr(key.intValue() + startingAddress);
@@ -126,12 +130,12 @@ class Function {
 		int j = 0;
 		for(Instruction instruction : instructions) {
 		    	builder.append(instruction);
-			/*if(j == 0 && this.label != null) {
+			if(j == 0 && this.label != null) {
                 		builder.append("\t; " + this.label);
                 	}
             		if(labels.containsKey(new Integer(j))) {
 				builder.append("\t; " + labels.get(new Integer(j)));
-			}*/
+			}
 			builder.append("\n");
 			j++;
 		}
