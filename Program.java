@@ -227,7 +227,14 @@ class FunctionCall extends Expr {
 		}
 
 		Symbol functionSymbol = new Symbol(funcid, Symbol.UNDEFINED, Symbol.FUNCTION, Symbol.UNDEFINED);
-		Symbol returnSymbol = function.addTemp();
+		Symbol returnSymbol;
+		if(function.getName().equals("primer")) {
+			returnSymbol = st.getScratch1();
+		}
+		else {
+			returnSymbol = function.addTemp();
+		}
+
 		function.add(Instruction.CallUnlinked(functionSymbol, symbols, returnSymbol));
 
 		return returnSymbol;

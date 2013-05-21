@@ -188,20 +188,25 @@ class Function {
 					linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
 					linkedInstructions.addLast(Instruction.Loadi(st.getScratch1()));
 
-					int position = variableSymbols.size() + tempSymbols.indexOf(returnTemp);
+					if(returnTemp.getType() == Symbol.TEMP) {
+						int position = variableSymbols.size() + tempSymbols.indexOf(returnTemp);
 
-					// Store current value in a scratch register
-					linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
+						// Store current value in a scratch register
+						linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
 
-					// Calculate proper place to store
-					linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
-					if(position > 0) {
-						linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
+						// Calculate proper place to store
+						linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
+						if(position > 0) {
+							linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
+						}
+
+						linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
+						linkedInstructions.addLast(Instruction.Loadd(st.getScratch1()));
+						linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
 					}
-
-					linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
-					linkedInstructions.addLast(Instruction.Loadd(st.getScratch1()));
-					linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
+					else {
+						linkedInstructions.addLast(Instruction.Stored(returnTemp));
+					}
 					// Return value has now been stored in temporary symbol
 
 					// Revert the FP
