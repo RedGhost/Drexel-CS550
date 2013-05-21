@@ -227,13 +227,7 @@ class FunctionCall extends Expr {
 		}
 
 		Symbol functionSymbol = new Symbol(funcid, Symbol.UNDEFINED, Symbol.FUNCTION, Symbol.UNDEFINED);
-		Symbol returnSymbol;
-		if(function.getName().equals("primer")) {
-			returnSymbol = st.getScratch1();
-		}
-		else {
-			returnSymbol = function.addTemp();
-		}
+		Symbol returnSymbol = function.addTemp();
 
 		function.add(Instruction.CallUnlinked(functionSymbol, symbols, returnSymbol));
 
@@ -630,12 +624,7 @@ class Program {
 			Proc mainProc = new Proc(new ParamList(), stmtlist);
 			DefineStatement main = new DefineStatement("main", mainProc);
 			main.translate(st, ft, null);
-
-			Function primerFunction = new Function("primer", null);
-			FunctionCall call = new FunctionCall("main", new ExpressionList());
-			call.translate(st, ft, primerFunction);
-			primerFunction.add(Instruction.Halt());
-			ft.addFunction(primerFunction);
+			ft.get("main").add(Instruction.Halt());
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());

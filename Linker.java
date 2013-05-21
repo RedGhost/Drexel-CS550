@@ -12,21 +12,20 @@ public class Linker {
 	 *            - SymbolTable to update.
 	 */
         public void link(SymbolTable st, FunctionTable ft) {
-	    Function primer = ft.get("primer");
-	    primer.link(st,ft,1);
-	    int addr = primer.numInstructions()+1;
+	    Function main = ft.get("main");
+	    st.getMainLocation().setValue(1);
+
+	    main.link(st,ft,1);
+	    int addr = main.numInstructions()+1;
 
 	    HashMap<String, Function> functions = ft.getFunctions();
 	    for(String functionName : functions.keySet()) {
-		if(functionName.equals("primer")) {
+		if(functionName.equals("main")) {
 			continue;
 		}
 
 		Function function = functions.get(functionName);
 		function.link(st, ft, addr);
-		if(functionName.equals("main")) {
-			st.getMainLocation().setValue(addr+1);
-		}
 
 		addr += function.numInstructions();
 	    }
@@ -45,8 +44,8 @@ public class Linker {
               symbol.setAddr(memoryAddr++);
             }
 
-            st.getSP().setValue(memoryAddr);
             st.getFP().setValue(memoryAddr);
+            st.getSP().setValue(memoryAddr + main.getVariables().size() + main.getTemps().size() + 2);
         }
 
         private void writeFile(String filename, String text) {
@@ -66,17 +65,14 @@ public class Linker {
 		System.out.println("Dumping out instructions to file " + output + "...");
 		StringBuilder builder = new StringBuilder();
 
-//builder.append("Primer()\n");
-	    Function primer = ft.get("primer");
-	    builder.append(primer);
-
+	    Function main = ft.get("main");
+	    builder.append(main);
 
 		HashMap<String, Function> functions = ft.getFunctions();
 		for(String functionName : functions.keySet()) {
-			if(functionName.equals("primer")) {
+			if(functionName.equals("main")) {
 				continue;
 			}
-//builder.append(functionName + "()\n");
 			Function function = functions.get(functionName);
 			builder.append(function);
 		}
@@ -95,6 +91,21 @@ public class Linker {
             	for(Symbol symbol : st.getConstants()) {
 		    builder.append(symbol.getAddr() + " " + symbol.getValue() + "\t; " + symbol.getName() + "\n");
             	}
+		
+		
+	    	Function main = ft.get("main");
+		int addr = 5 + st.getConstants().size();
+		for(Symbol symbol : main.getVariables()) {
+			builder.append(addr + " 0\t; " + symbol.getName() + "\n");
+			addr++;
+		}
+		for(Symbol symbol : main.getTemps()) {
+			builder.append(addr + " 0\t; " + symbol.getName() + "\n");
+			addr++;
+		}
+		builder.append((addr++) + " 0\t; main return value\n");
+		builder.append((addr++) + " 0\t; Previous FP\n");
+		builder.append((addr++) + " " + main.numInstructions() + "\t; Return address\n");
 
 		writeFile(output, builder.toString());
 	}
