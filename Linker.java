@@ -15,8 +15,10 @@ public class Linker {
 	    Function main = ft.get("main");
 	    st.getMainLocation().setValue(1);
 
+	    System.out.println("Linking main");
 	    main.link(st,ft,1);
 	    int addr = main.numInstructions()+1;
+	    System.out.println("Main has " + main.numInstructions() + " instructions, " + main.getVariables().size() + " variables, and " + main.getTemps().size() + " temps.");
 
 	    HashMap<String, Function> functions = ft.getFunctions();
 	    for(String functionName : functions.keySet()) {
@@ -24,8 +26,10 @@ public class Linker {
 			continue;
 		}
 
+		System.out.println("Linking " + functionName);
 		Function function = functions.get(functionName);
 		function.link(st, ft, addr);
+		System.out.println(functionName + " has " + function.numInstructions() + " instructions, " + function.getVariables().size() + " variables, and " + function.getTemps().size() + " temps.");
 
 		addr += function.numInstructions();
 	    }

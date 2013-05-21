@@ -277,10 +277,6 @@ class DefineStatement extends Statement {
             Function newFunction = new Function(name, label);
 	    proc.translate(st, ft, newFunction);
 
-	    if(name.equals("main")) {
-		newFunction.add(PseudoInstruction.ReturnUnlinked(st.addConstant(new Integer(0))));
-	    }
-
 	    ft.addFunction(newFunction);
 	}
 
@@ -624,6 +620,7 @@ class Program {
 			Proc mainProc = new Proc(new ParamList(), stmtlist);
 			DefineStatement main = new DefineStatement("main", mainProc);
 			main.translate(st, ft, null);
+			ft.get("main").add(PseudoInstruction.ReturnUnlinked(st.addConstant(new Integer(0))));
 			ft.get("main").add(Instruction.Halt());
 		} catch (Exception e) {
 			e.printStackTrace();

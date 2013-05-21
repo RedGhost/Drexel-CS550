@@ -126,12 +126,12 @@ class Function {
 		int j = 0;
 		for(Instruction instruction : instructions) {
 		    	builder.append(instruction);
-			if(j == 0 && this.label != null) {
+			/*if(j == 0 && this.label != null) {
                 		builder.append("\t; " + this.label);
                 	}
             		if(labels.containsKey(new Integer(j))) {
 				builder.append("\t; " + labels.get(new Integer(j)));
-			}
+			}*/
 			builder.append("\n");
 			j++;
 		}

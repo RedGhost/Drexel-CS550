@@ -1,7 +1,5 @@
 define func 
 proc( n )
-  s := n;
-  return s
+  return n
 end;
-n := 5;
-s := func( n )
+s := func( 5 )

@@ -56,6 +56,10 @@ class Instruction
 	this.comment = comment;
     }
 
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     public String getOperator(){
         return operator;
     }

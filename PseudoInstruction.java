@@ -88,10 +88,12 @@ class PseudoInstruction extends Instruction {
 	}
 	else {
 		linkedInstructions.addLast(Instruction.Loadd(symbol));
+		linkedInstructions.getLast().setComment("" + this);
 		return;
 	}
 	// Get the proper space in memory
 	linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
+	linkedInstructions.getLast().setComment("" + this);
 	if(position > 0) {
 		linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
 	}
@@ -112,11 +114,13 @@ class PseudoInstruction extends Instruction {
 	}
 	else {
 		linkedInstructions.addLast(Instruction.Stored(symbol));
+		linkedInstructions.getLast().setComment("" + this);
 		return;
 	}
 
 	// Store current value in a scratch register
 	linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
+	linkedInstructions.getLast().setComment("" + this);
 
 	// Calculate proper place to store
 	linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
@@ -131,6 +135,7 @@ class PseudoInstruction extends Instruction {
 
     private void linkADD(SymbolTable st, FunctionTable ft, Function function, LinkedList<Instruction> linkedInstructions) {
 	linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
+	linkedInstructions.getLast().setComment("" + this);
 	PseudoInstruction.Loadu(this.getSymbol()).link(st, ft, function, linkedInstructions);
 	linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
 	linkedInstructions.addLast(Instruction.Loadd(st.getScratch2()));
@@ -139,6 +144,7 @@ class PseudoInstruction extends Instruction {
 
     private void linkSUB(SymbolTable st, FunctionTable ft, Function function, LinkedList<Instruction> linkedInstructions) {
 	linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
+	linkedInstructions.getLast().setComment("" + this);
 	PseudoInstruction.Loadu(this.getSymbol()).link(st, ft, function, linkedInstructions);
 	linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
 	linkedInstructions.addLast(Instruction.Loadd(st.getScratch2()));
@@ -147,6 +153,7 @@ class PseudoInstruction extends Instruction {
 
     private void linkMUL(SymbolTable st, FunctionTable ft, Function function, LinkedList<Instruction> linkedInstructions) {
 	linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
+	linkedInstructions.getLast().setComment("" + this);
 	PseudoInstruction.Loadu(this.getSymbol()).link(st, ft, function, linkedInstructions);
 	linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
 	linkedInstructions.addLast(Instruction.Loadd(st.getScratch2()));
@@ -188,9 +195,13 @@ class PseudoInstruction extends Instruction {
 	Symbol constant1 = st.addConstant(new Integer(1));
 	Symbol constant2 = st.addConstant(new Integer(2));
 
+	// Increment SP to the next available memory block
+	linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
+	linkedInstructions.addLast(Instruction.Add(constant1));
+	linkedInstructions.addLast(Instruction.Stored(st.getSP()));
+
 	for (Symbol paramSymbol : symbols) {
 		PseudoInstruction.Loadu(paramSymbol).link(st, ft, function, linkedInstructions);
-
 		linkedInstructions.addLast(Instruction.Storei(st.getSP()));
 		linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
 		linkedInstructions.addLast(Instruction.Add(constant1));
@@ -201,7 +212,7 @@ class PseudoInstruction extends Instruction {
 	}
 
 	// Allocate space for the variables and temporaries and return val
-	Symbol constantVarSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size() + 1));
+	Symbol constantVarSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size()));
 	linkedInstructions.addLast(Instruction.Add(constantVarSize));
 	linkedInstructions.addLast(Instruction.Stored(st.getSP()));
 
@@ -228,28 +239,6 @@ class PseudoInstruction extends Instruction {
 	linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
 	linkedInstructions.addLast(Instruction.Subtract(constant2));
 	linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
-	linkedInstructions.addLast(Instruction.Loadi(st.getScratch1()));
-
-	if(returnTemp.getType() == Symbol.TEMP) {
-		int position = function.getVariables().size() + function.getTemps().indexOf(returnTemp);
-
-		// Store current value in a scratch register
-		linkedInstructions.addLast(Instruction.Stored(st.getScratch1()));
-
-		// Calculate proper place to store
-		linkedInstructions.addLast(Instruction.Loadd(st.getFP()));
-		if(position > 0) {
-			linkedInstructions.addLast(Instruction.Add(st.addConstant(new Integer(position))));
-		}
-
-		linkedInstructions.addLast(Instruction.Stored(st.getScratch2()));
-		linkedInstructions.addLast(Instruction.Loadd(st.getScratch1()));
-		linkedInstructions.addLast(Instruction.Storei(st.getScratch2()));
-	}
-	else {
-		linkedInstructions.addLast(Instruction.Stored(returnTemp));
-	}
-	// Return value has now been stored in temporary symbol
 
 	// Revert the FP
 	linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
@@ -263,9 +252,14 @@ class PseudoInstruction extends Instruction {
 	linkedInstructions.addLast(Instruction.Stored(st.getSP()));
 
 	// Revert the SP
-	Symbol constantSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size()));
+	Symbol constantSize = st.addConstant(new Integer(callFunction.getVariables().size() + callFunction.getTemps().size() + 1));
 	linkedInstructions.addLast(Instruction.Loadd(st.getSP()));
 	linkedInstructions.addLast(Instruction.Subtract(constantSize));
 	linkedInstructions.addLast(Instruction.Stored(st.getSP()));
+
+	linkedInstructions.addLast(Instruction.Loadi(st.getScratch1())); // return in memory
+
+	// Store return value in temporary
+	PseudoInstruction.Storeu(returnTemp).link(st, ft, function, linkedInstructions);
     }
 }
