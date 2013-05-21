@@ -43,9 +43,6 @@ view-trans : trans.out
 view-link : linked.out
 	-$(pager) linked.out
 
-view-op : optimized.out
-	-$(pager) optimized.out
-
 run : linked.out
 	-$(ram) -m $(RAM_MEM) linked.out initialmemory.out
 

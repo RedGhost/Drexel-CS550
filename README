@@ -1,5 +1,5 @@
 # Group 3
-# assignment 3
+# assignment 4
 #
 
 ### Common File(s) ###
@@ -7,6 +7,7 @@
   makefile                  - Makefile with view/build/clean commands
   java-cup-11a.jar          - .jar libraries for cup (included since they're not installed on tux)
   java-cup-11a-runtime.jar  - .jar libraries for cup (included since they're not installed on tux)
+  ram                       - ram executable
 
 ### Part 1 ###
 - view cmd: 'make view'
@@ -19,17 +20,17 @@
 - Viewing files:
   Once make compile is run you can view the various files that were produced using this command:
   make view-trans   - displays the pre-linked file
-  make view-op      - displays the optimized linked file
   make view-link    - displays the linked file
 - Running files using the RAL interpreter:
   make run          - runs the unoptimized linked file using the initial memory file
-  make run-op       - runs the optimized linked file using the initial memory file
 - Source File(s):
   interpreterext.cup  - cup grammar file
   interpreterext.flex - jflex scanner file
   Program.java        - Code file containing class definitions
   SymbolTable.java    - Maintains the symbols used in the program
-  Translator.java     - Translates the symbols to RAL instructions
+  Linker.java         - Links the symbols to RAL instructions
+  FunctionTable.java  - Contains Function and FunctionTable classes
+  Instruction.java    - Class representing a RAL instruction
 
 ### Testing ###
 Testing was done by running against the sample input files.
