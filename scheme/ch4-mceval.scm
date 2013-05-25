@@ -305,6 +305,12 @@
         (list 'cdr cdr)
         (list 'cons cons)
         (list 'null? null?)
+	;;; Added the following primitives for assignment 5:
+        (list '= =)
+        (list '* *)
+        (list '- -)
+        (list '+ +)
+        (list '/ /)
 ;;      more primitives
         ))
 
