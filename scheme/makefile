@@ -5,6 +5,15 @@ scheme=mit-scheme
 # view-p4 — Displays all of the files required for part 4 using less.
 # run-p4 — Displays the result of the static environment interpreter and then the dynamic environment interpreter.
 
+view-p1: part1.scm
+	-$(pager) part1.scm
+
+view-p2: part2.scm
+	-$(pager) part2.scm
+
+view-p3: part3.scm
+	-$(pager) part3.scm
+
 view-p4 : ch4-mceval.scm ch4-mceval-dynamic.scm input/part4-static.scm input/part4-dynamic.scm
 	-$(pager) ch4-mceval.scm
 	-$(pager) ch4-mceval-dynamic.scm
@@ -14,3 +23,6 @@ view-p4 : ch4-mceval.scm ch4-mceval-dynamic.scm input/part4-static.scm input/par
 run-p4 : ch4-mceval.scm ch4-mceval-dynamic.scm input/part4-static.scm input/part4-dynamic.scm
 	$(scheme) < input/part4-static.scm | $(pager)
 	$(scheme) < input/part4-dynamic.scm | $(pager)
+
+view-p5: part5.scm
+	-$(pager) part5.scm
