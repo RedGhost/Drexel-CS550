@@ -31,7 +31,7 @@ parser code {:
 terminal NOT; // Assignment 2 (mks62) added NOT
 terminal SEMI, PLUS, MINUS, TIMES, ASSIGN, LPAREN, RPAREN, LBRACKET, RBRACKET; // Assignment 2 (mwa29) added LBRACKET,RBRACKET
 terminal IF, THEN, ELSE, FI, WHILE, DO, OD, REPEAT, UNTIL, CONS, CAR, CDR, NULLP, INTP, LISTP, CONCAT;
-terminal DEFINE, PROC, END,RETURN;
+terminal PROC, END,RETURN;
 terminal Integer NUMBER;
 terminal COMMA;
 terminal String ID;
@@ -40,7 +40,7 @@ non terminal Program program;
 non terminal StatementList statement_list;
 non terminal ParamList param_list;
 non terminal ExpressionList expr_list;
-non terminal Statement statement, assign_statement, if_statement, while_statement, repeat_statement, define_statement, return_statement;
+non terminal Statement statement, assign_statement, if_statement, while_statement, repeat_statement, return_statement;
 non terminal Expr expr, term, factor, funcall;
 // Assignment 2 (mwa29)
 non terminal List list;
@@ -49,7 +49,7 @@ non terminal Sequence sequence;
 program ::= statement_list:list
 	    {: Program program = new Program(list);
 	       program.eval(hm);
-	     program.dump(hm, var, st, linker);
+               program.dump(hm, var, st, linker);
                // program.translate(st, funcTable);
                // linker.printRAL("trans.out", st, funcTable);
                // linker.link(st, funcTable);
@@ -65,8 +65,6 @@ statement_list ::= statement:s
 
 statement ::= assign_statement:a
 	      {: RESULT = a; :}
-            | define_statement:d
-              {: RESULT = d; :}
 	    | if_statement:i
 	      {: RESULT = i; :}
 	    | while_statement:w
@@ -77,9 +75,7 @@ statement ::= assign_statement:a
               {: RESULT = r; :};
 
 assign_statement ::= ID:i ASSIGN expr:e
-		     {: RESULT = new AssignStatement(i,e); :}
-                     | ID:i ASSIGN PROC LPAREN param_list:pl RPAREN statement_list:sl END
-		     {: RESULT = new AssignStatement(i,new Proc(pl,sl)); :};
+		     {: RESULT = new AssignStatement(i,e); :};
 
 if_statement ::= IF expr:e THEN statement_list:s1 ELSE statement_list:s2 FI
 		 {: RESULT = new IfStatement(e,s1,s2); :};
@@ -120,7 +116,9 @@ expr ::= NOT LPAREN expr:e RPAREN
 	   | expr:list1 CONCAT factor:list2
 	 {: RESULT = new Concat(list1, list2); :}
          | term:t
-	 {: RESULT = t; :};
+	 {: RESULT = t; :}
+         | PROC LPAREN param_list:pl RPAREN statement_list:sl END
+	 {: RESULT = new Proc(pl,sl); :};
 
 term ::= term:t TIMES factor:f
          {: RESULT = new Times(t,f); :}

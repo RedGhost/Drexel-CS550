@@ -15,7 +15,6 @@ import java_cup.runtime.Symbol;
 "*" {return new Symbol(sym.TIMES); }
 "," {return new Symbol(sym.COMMA); }
 ":=" {return new Symbol(sym.ASSIGN); }
-"define" {return new Symbol(sym.DEFINE); }
 "(" {return new Symbol(sym.LPAREN); }
 ")" {return new Symbol(sym.RPAREN); }
 "[" {return new Symbol(sym.LBRACKET); } // Assignment 2 (mwa29)

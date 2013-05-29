@@ -2,7 +2,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-class Expr {
+class Expr extends Exception {
 
 	public Expr() {
 	}
@@ -242,40 +242,6 @@ abstract class Statement {
 	}
 }
 
-// added for 2c
-class DefineStatement extends Statement {
-
-	private String name;
-	private Proc proc;
-	private ParamList paramlist;
-	private StatementList statementlist;
-
-	public DefineStatement(String id, Proc process) {
-		name = id;
-		proc = process;
-	}
-
-	public void translate(SymbolTable st, Function function) {
-	    // Symbol label;
-            // if(name.equals("main")) {
-	    // 	label = st.getMainLocation();
-	    // }
-	    // else {
-	    // 	label = st.createLabel();
-	    // }
-            // Function newFunction = new Function(name, label);
-	    // proc.translate(st, newFunction);
-
-	    // ft.addFunction(newFunction);
-	}
-
-	public void eval(HashMap<String, ValueType> nametable,
-			HashMap<String, Proc> functable) {
-		// get the named proc object from the function table.
-		// System.out.println("Adding Process:"+name+" to Functiontable");
-		functable.put(name, proc);
-	}
-}
 
 class ReturnStatement extends Statement {
 
@@ -294,8 +260,7 @@ class ReturnStatement extends Statement {
 		// Java can't throw exceptions of numbers, so we'll convert it to a
 		// string
 		// and then on the other end we'll reconvert back to Integer..
-		throw new Exception(expr.eval(nametable)
-				.toString(nametable));
+		throw expr.eval(nametable);
 	}
 }
 
@@ -562,7 +527,7 @@ class Proc extends ValueType {
 
 	public ValueType apply(HashMap<String, ValueType> nametable, ExpressionList expressionlist) {
 		// System.out.println("Executing Proceedure");
-		HashMap<String, ValueType> newnametable = new HashMap<String, ValueType>();
+	    HashMap<String, ValueType> newnametable = (HashMap<String, ValueType>) nametable.clone();// new HashMap<String, ValueType>();
 
 		// bind parameters in new name table
 		// we need to get the underlying List structure that the ParamList
@@ -593,9 +558,9 @@ class Proc extends ValueType {
 			// Note, the result shold contain the proceedure's return value as a
 			// String
 			// System.out.println();
-			// result.printStackTrace();
+		        // result.printStackTrace();
 			// System.out.println();
-			return new Number(result.getMessage());
+			return (ValueType)result;
 		}
 		System.out.println("Error:  no return value");
 		System.exit(1);
