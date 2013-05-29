@@ -646,6 +646,26 @@ class Program {
 			System.out.println(e.getMessage());
 		}
 	}
+
+    public void dump(HashMap<String, ValueType> nametable,
+		     HashMap<String, Proc> functiontable, LinkedList var, SymbolTable st,
+		     Linker l) {
+	System.out.println(nametable.values());
+	System.out.println("Dumping out all the variables...");
+	if (nametable != null) {
+	    for (String name : nametable.keySet()) {
+		System.out.println(name
+				   + "="
+				   + nametable.get(name).toString(nametable,
+								  functiontable));
+	    }
+	}
+	if (functiontable != null) {
+	    for (String name : functiontable.keySet()) {
+		System.out.println("Function: " + name + " defined...");
+	    }
+	}
+    }
 }
 
 // Assignment 2 (mwa29)
