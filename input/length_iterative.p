@@ -1,4 +1,4 @@
-define Length proc ( list )
+Length := proc ( list )
   if listp( list ) then
     current := list;
     length := 0;

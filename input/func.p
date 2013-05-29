@@ -1,4 +1,4 @@
-define func 
+func :=
 proc( n )
   return n
 end;

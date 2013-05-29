@@ -11,11 +11,11 @@ action code {:
 	 * but helpful to dump all the values at the end */
 	public LinkedList var = new LinkedList();
     /* ft is used to store and retrieve the functions */
-    public HashMap ft = new HashMap();
+    //public HashMap ft = new HashMap();
     
     /* Added for assignment 3 */
     public SymbolTable st = new SymbolTable();
-    public FunctionTable funcTable = new FunctionTable();
+    //public FunctionTable funcTable = new FunctionTable();
     public Linker linker = new Linker();
     
 :}
@@ -48,8 +48,8 @@ non terminal Sequence sequence;
 
 program ::= statement_list:list
 	    {: Program program = new Program(list);
-	       program.eval(hm, ft);
-	     program.dump(hm, ft, var, st, linker);
+	       program.eval(hm);
+	     program.dump(hm, var, st, linker);
                // program.translate(st, funcTable);
                // linker.printRAL("trans.out", st, funcTable);
                // linker.link(st, funcTable);
@@ -77,10 +77,9 @@ statement ::= assign_statement:a
               {: RESULT = r; :};
 
 assign_statement ::= ID:i ASSIGN expr:e
-		     {: RESULT = new AssignStatement(i,e); :};
-
-define_statement ::= DEFINE ID:i PROC LPAREN param_list:pl RPAREN statement_list:sl END
-                     {: RESULT = new DefineStatement(i,new Proc(pl,sl)); :};
+		     {: RESULT = new AssignStatement(i,e); :}
+                     | ID:i ASSIGN PROC LPAREN param_list:pl RPAREN statement_list:sl END
+		     {: RESULT = new AssignStatement(i,new Proc(pl,sl)); :};
 
 if_statement ::= IF expr:e THEN statement_list:s1 ELSE statement_list:s2 FI
 		 {: RESULT = new IfStatement(e,s1,s2); :};
@@ -120,7 +119,7 @@ expr ::= NOT LPAREN expr:e RPAREN
 	 {: RESULT = new Listp(e); :}
 	   | expr:list1 CONCAT factor:list2
 	 {: RESULT = new Concat(list1, list2); :}
-       | term:t
+         | term:t
 	 {: RESULT = t; :};
 
 term ::= term:t TIMES factor:f
