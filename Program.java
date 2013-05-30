@@ -207,6 +207,7 @@ class FunctionCall extends Expr {
 	public FunctionCall(String id, ExpressionList el) {
 		funcid = id;
 		explist = el;
+		//System.out.println(funcid + " " + explist.getExpressions());
 	}
 
 	public Symbol translate(SymbolTable st, Function function) {
@@ -226,6 +227,8 @@ class FunctionCall extends Expr {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable) {
+	    //System.out.println(funcid);
+	    //System.out.println(nametable.get(funcid).getClass());
 	    return ((Proc)nametable.get(funcid)).apply(nametable, explist);
 	}
 }
@@ -430,7 +433,7 @@ class ParamList {
 
 	public ParamList(String name, ParamList parlist) {
 		parameterlist = parlist.getParamList();
-		parameterlist.add(name);
+		parameterlist.add(0,name); // Want to add at front
 	}
 
 	public LinkedList<String> getParamList() {
@@ -453,10 +456,8 @@ class ExpressionList {
 	}
 
 	public ExpressionList(Expr ex, ExpressionList el) {
-		list = new LinkedList<Expr>();
-		// we need ot add the expression to the front of the list
+		list = el.getExpressions();
 		list.add(0, ex);
-
 	}
 
 	public LinkedList<Expr> getExpressions() {
@@ -500,6 +501,7 @@ class Proc extends ValueType {
 
 	private ParamList parameterlist;
 	private StatementList stmtlist;
+        private HashMap<String, ValueType> newnametable;
 
 	public Proc(ParamList pl, StatementList sl) {
 		parameterlist = pl;
@@ -522,12 +524,12 @@ class Proc extends ValueType {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable) {
+	    newnametable = (HashMap<String, ValueType>) nametable.clone();
 		return this;
 	}
 
 	public ValueType apply(HashMap<String, ValueType> nametable, ExpressionList expressionlist) {
 		// System.out.println("Executing Proceedure");
-	    HashMap<String, ValueType> newnametable = (HashMap<String, ValueType>) nametable.clone();// new HashMap<String, ValueType>();
 
 		// bind parameters in new name table
 		// we need to get the underlying List structure that the ParamList
@@ -537,7 +539,8 @@ class Proc extends ValueType {
 
 		if (parameterlist.getParamList().size() != expressionlist
 				.getExpressions().size()) {
-			System.out.println("Param count does not match");
+			System.out.println("Param count does not match: param list=" + parameterlist.getParamList() +
+					   " expression list=" + expressionlist.getExpressions());
 			System.exit(1);
 		}
 		while (p.hasNext() && e.hasNext()) {
@@ -558,7 +561,7 @@ class Proc extends ValueType {
 			// Note, the result shold contain the proceedure's return value as a
 			// String
 			// System.out.println();
-		        // result.printStackTrace();
+		    //		        result.printStackTrace();
 			// System.out.println();
 			return (ValueType)result;
 		}
@@ -598,7 +601,7 @@ class Program {
 		try {
 			stmtlist.eval(nametable);
 		} catch (Exception e) {
-			e.printStackTrace();
+		    //			e.printStackTrace();
 			System.out.println(e.getMessage());
 		}
 	}
