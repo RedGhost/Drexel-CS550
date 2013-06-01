@@ -573,6 +573,84 @@ class Proc extends ValueType {
 	}
 }
 
+class UnnamedProc extends ValueType {
+
+	private ParamList parameterlist;
+	private StatementList stmtlist;
+	private ExpressionList exprList;
+    private HashMap<String, ValueType> newnametable;
+
+	public UnnamedProc(ParamList pl, StatementList sl, ExpressionList el) {
+		parameterlist = pl;
+		stmtlist = sl;
+		exprList = el;
+	}
+
+	public Symbol translate(SymbolTable st, Function function) {
+		Iterator<String> p = parameterlist.getParamList().iterator();
+		while(p.hasNext()) {
+			String param = p.next();
+			function.addParameter(param);
+		}
+		stmtlist.translate(st, function);
+		return null; // FIXME: Needed to return Symbol in order to match ValueType
+	}
+
+	public String toString(HashMap<String, ValueType> nametable) {
+	    // TODO: Implement functions toString()...
+		return new String("");
+	}
+
+	public ValueType eval(HashMap<String, ValueType> nametable) {
+	    newnametable = (HashMap<String, ValueType>) nametable.clone();
+		return apply(nametable, exprList);
+	}
+
+	public ValueType apply(HashMap<String, ValueType> nametable, ExpressionList expressionlist) {
+		// System.out.println("Executing Proceedure");
+
+		// bind parameters in new name table
+		// we need to get the underlying List structure that the ParamList
+		// uses...
+		Iterator<String> p = parameterlist.getParamList().iterator();
+		Iterator<Expr> e = expressionlist.getExpressions().iterator();
+
+		if (parameterlist.getParamList().size() != expressionlist
+				.getExpressions().size()) {
+			System.out.println("Param count does not match: param list=" + parameterlist.getParamList() +
+					   " expression list=" + expressionlist.getExpressions());
+			System.exit(1);
+		}
+		while (p.hasNext() && e.hasNext()) {
+
+			// assign the evaluation of the expression to the parameter name.
+			newnametable.put(p.next(),
+					e.next().eval(nametable));
+			// System.out.println("Loading Nametable for procedure with: "+p+" = "+nametable.get(p));
+
+		}
+		// evaluate function body using new name table and
+		// old function table
+		// eval statement list and catch return
+		// System.out.println("Beginning Proceedure Execution..");
+		try {
+			stmtlist.eval(newnametable);
+		} catch (Exception result) {
+			// Note, the result shold contain the proceedure's return value as a
+			// String
+			// System.out.println();
+		    //		        result.printStackTrace();
+			// System.out.println();
+			return (ValueType)result;
+		}
+		System.out.println("Error:  no return value");
+		System.exit(1);
+		// need this or the compiler will complain, but should never
+		// reach this...
+		return null;
+	}
+}
+
 class Program {
 
 	private StatementList stmtlist;

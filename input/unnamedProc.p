@@ -1,0 +1,1 @@
+y := proc( x ) return x*x end ( 2 )

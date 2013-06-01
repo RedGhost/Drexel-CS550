@@ -118,7 +118,9 @@ expr ::= NOT LPAREN expr:e RPAREN
          | term:t
 	 {: RESULT = t; :}
          | PROC LPAREN param_list:pl RPAREN statement_list:sl END
-	 {: RESULT = new Proc(pl,sl); :};
+	 {: RESULT = new Proc(pl,sl); :}
+	 	 | PROC LPAREN param_list:pl RPAREN statement_list:sl END LPAREN expr_list:el RPAREN
+	 {: RESULT = new UnnamedProc(pl,sl,el); :};
 
 term ::= term:t TIMES factor:f
          {: RESULT = new Times(t,f); :}
