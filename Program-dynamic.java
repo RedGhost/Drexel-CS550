@@ -498,7 +498,6 @@ class StatementList {
 }
 
 class Proc extends ValueType {
-
 	private ParamList parameterlist;
 	private StatementList stmtlist;
         private HashMap<String, ValueType> newnametable;
@@ -524,12 +523,13 @@ class Proc extends ValueType {
 	}
 
 	public ValueType eval(HashMap<String, ValueType> nametable) {
-	    newnametable = (HashMap<String, ValueType>) nametable.clone();
 		return this;
 	}
 
 	public ValueType apply(HashMap<String, ValueType> nametable, ExpressionList expressionlist) {
 		// System.out.println("Executing Proceedure");
+
+                newnametable = (HashMap<String, ValueType>) nametable.clone();
 
 		// bind parameters in new name table
 		// we need to get the underlying List structure that the ParamList
@@ -544,12 +544,10 @@ class Proc extends ValueType {
 			System.exit(1);
 		}
 		while (p.hasNext() && e.hasNext()) {
-
 			// assign the evaluation of the expression to the parameter name.
 			newnametable.put(p.next(),
 					e.next().eval(nametable));
 			// System.out.println("Loading Nametable for procedure with: "+p+" = "+nametable.get(p));
-
 		}
 		// evaluate function body using new name table and
 		// old function table
