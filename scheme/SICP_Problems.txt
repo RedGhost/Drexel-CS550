@@ -1,0 +1,51 @@
+# Group 3
+# assignment 6 SICP Problems
+# Mateusz Stankiewicz - Assignment 4 group leader
+# Zachary Long
+# Timothy Hanna
+# Mark Albrecht
+
+4.59
+a:
+	(meeting ?division (Friday ?time))
+b:
+(rule (meeting-time ?person-a ?date-and-time)
+      (or (meeting whole-company ?time)
+          (and (job ?person-a (?division . ?title) 
+	  (meeting ?division ?date-and-time)  ))))
+c:
+(meeting-time (hacker alyssa p) (wednesday ?date-and-time))
+
+4.65:
+	When wheel(?who) runs, it checks every entry in the database against the first clause, which asks for every supervisor of a person.  This will return all eight entries in the database (of which Oliver Warbucks is involved in three).  wheel will then check for a supervisor of the supervisors listed in those eight entries, and return the name if true.  In this case, wheel return five entries:
+Oliver Warbucks is the supervisor of Ben Bitdiddle, who is the supervisor of Alyssa Hacker
+Oliver Warbucks is the supervisor of Ben Bitdiddle, who is the supervisor of Cy D. Fect
+Oliver Warbucks is the supervisor of Ben Bitdiddle, who is the supervisor of Lem E Tweakit
+Ben Bitdiddle is the supervisor of Alyssa Hacker, who is the supervisor of Louis Reasoner
+Oliver Warbucks is the supervisor of Eben Scrooge, who is the supervisor of Robert Crachet
+This causes the repeat entries.
+
+4.68:
+Query Language:
+(rule (reverse () ()  ))
+(rule (reverse (?head . ?tail) ?rev )
+	(and (reverse ?tail ?revtail )
+	     (append-to-form ?revtail (?head) ?rev) ) )
+Prolog:
+rev([],[]).
+rev([H|T], R):- rev(T, RT), append(RT, [H], R).
+
+4.75:
+(define (uniquely-asserted ops f-stream) 
+   (stream-flatmap (lambda (fr)
+     (let ((stream (qeval (negated-query ops) (singleton-stream fr))))
+       (cond ((stream-null? stream) the-empty-stream) ((stream-null? (stream-cdr stream)) stream) 
+	     (else the-empty-stream)))) 
+   f-stream))
+ 
+  (put 'unique 'qeval uniquely-asserted) 
+
+Query to list all people who supervise one person:
+(and (supervisor ?sub ?sup) (unique (supervisor ?yarg ?sup)))
+
+
