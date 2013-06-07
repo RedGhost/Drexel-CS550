@@ -60,8 +60,10 @@ reduce_stmt(config(if(E,L1,L2),Env),Env1) :- reduce_value(config(E,Env),V), redu
 
 reduce_stmt(config(while(V,L),Env),Env1) :- integer(V), V = 0, append(Env,[],Env1).
 reduce_stmt(config(while(V,L),Env),Env1) :- integer(V), V < 0, append(Env,[],Env1).
-reduce_stmt(config(while(V,L),Env),Env1) :- integer(V), V > 0, reduce_program(config(L,Env),Env1). %TODO check the loop value again.
-reduce_stmt(config(while(E,L),Env),Env1) :- reduce_value(config(E,Env),V), reduce_stmt(config(while(V,L),Env),Env1).
+reduce_stmt(config(while(V,L),Env),Env1) :- integer(V), V > 0, reduce_program(config(L,Env),Env1).
+reduce_stmt(config(while(E,L),Env),Env1) :- reduce_value(config(E,Env),V), V = 0, append(Env,[],Env1).
+reduce_stmt(config(while(E,L),Env),Env1) :- reduce_value(config(E,Env),V), V < 0, append(Env,[],Env1).
+reduce_stmt(config(while(E,L),Env),Env1) :- reduce_value(config(E,Env),V), V > 0, reduce_program(config(L,Env),Env2), reduce_stmt(config(while(E,L),Env2),Env1).
 
 %Statements will be passed into this function as a list. e.g. [assign(x,3),assign(y,4)]
 %When the first statement is complete, the resulting environment is passed along as the environment for the next statement.
