@@ -1,0 +1,27 @@
+# Group 3
+# assignment 7
+# Timothy Hanna - Assignment 7 group leader
+# Zachary Long
+# Mateusz Stankiewicz
+# Mark Albrecht
+#
+
+### Common File(s) ###
+  README                    - The file you are currently reading.
+  SICP_Problems.txt         - Answers to problems 1-4
+  mini2.pl                  - Answers to problem 5
+
+
+Problems 1-4:
+The SICP_Problems.txt file contains all of the answers for questions 1-4.
+
+Problem 5:
+- details:
+  mini2.pl is the updated version of mini2.pl with added if and while statements.
+- Running:
+  start prolog and run 'consult(mini2.pl).'
+  Run reduce program commands.
+
+
+### Testing ###
+For problem 5, mini2.pl contains test cases at the top of the file as comments.
