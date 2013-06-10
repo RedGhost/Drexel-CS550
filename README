@@ -1,10 +1,5 @@
-# Group 3
-# assignment 4
-# Mateusz Stankiewicz - Assignment 4 group leader
-# Zachary Long
-# Timothy Hanna
 # Mark Albrecht
-#
+# Extra Credit
 
 ### Common File(s) ###
   README                    - The file you are currently reading.
@@ -17,23 +12,15 @@
 - view cmd: 'make view'
 - build:    'make compile'
 - details:
-  The compile method requires a file or instructions to be given. When that happens it will generate
-  a non-linked file (trans.out) a fully linked an runnable file (link.out),and an initial memory file (initialmemory.out).
-  These files can be run using the RAL interpreter to produce the desired effect.
-  Updated for Assignment 4 includes proc routines.
-- Viewing files:
-  Once make compile is run you can view the various files that were produced using this command:
-  make view-trans   - displays the pre-linked file
-  make view-link    - displays the linked file
-- Running files using the RAL interpreter:
-  make run          - runs the unoptimized linked file using the initial memory file
+  Updates to allow for class definitions. Does not include support for inheritance.
+- Running files:
+  make run          - Runs the parser against stdin
 - Source File(s):
   interpreterext.cup  - cup grammar file
   interpreterext.flex - jflex scanner file
   Program.java        - Code file containing class definitions
   SymbolTable.java    - Maintains the symbols used in the program
   Linker.java         - Links the symbols to RAL instructions
-  FunctionTable.java  - Contains Function and FunctionTable classes
   Instruction.java    - Class representing a RAL instruction
   PseudoInstruction.java - Class storing pseudo RAL instructions that get linked to real instructions.
 

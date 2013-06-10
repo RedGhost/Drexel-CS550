@@ -1,7 +1,0 @@
-(load "ch4-mceval.scm")
-(define the-global-environment (setup-environment))
-(driver-loop)
-(define (make-adder x) (lambda (y) (+ x y)))
-(define add1 (make-adder 1))
-(define x 2)
-(add1 2)

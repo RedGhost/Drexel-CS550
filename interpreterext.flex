@@ -9,6 +9,7 @@ import java_cup.runtime.Symbol;
 %%
 %cup
 %%
+"." {return new Symbol(sym.DOT); }
 ";" {return new Symbol(sym.SEMI); }
 "+" {return new Symbol(sym.PLUS); }
 "-" {return new Symbol(sym.MINUS); }
@@ -27,6 +28,7 @@ import java_cup.runtime.Symbol;
 "while" {return new Symbol(sym.WHILE); }
 "do" {return new Symbol(sym.DO); }
 "od" {return new Symbol(sym.OD); }
+"class" {return new Symbol(sym.CLASS); }
 "proc" {return new Symbol(sym.PROC); }
 "end" {return new Symbol(sym.END); }
 "repeat" {return new Symbol(sym.REPEAT); }

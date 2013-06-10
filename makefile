@@ -31,20 +31,10 @@ view : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Link
 	-$(pager) Linker.java
 	-$(pager) Symbol.java
 
-compile-static :
-	cp Program-static.java Program.java
+compile :
 	$(java) -classpath $(CLASSPATH) java_cup.Main interpreterext.cup
 	$(lex) interpreterext.flex
 	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java PseudoInstruction.java
-
-compile-dynamic :
-	cp Program-dynamic.java Program.java
-	$(java) -classpath $(CLASSPATH) java_cup.Main interpreterext.cup
-	$(lex) interpreterext.flex
-	$(javac) -classpath $(CLASSPATH) parser.java sym.java Yylex.java Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java PseudoInstruction.java
-
-run-static : compile-static run
-run-dynamic : compile-dynamic run
 
 run : interpreterext.cup interpreterext.flex Program.java SymbolTable.java Linker.java Symbol.java FunctionTable.java Instruction.java PseudoInstruction.java
 	$(java) -classpath $(CLASSPATH) parser

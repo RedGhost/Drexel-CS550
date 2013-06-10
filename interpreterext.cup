@@ -2,36 +2,37 @@ import java_cup.runtime.*;
 import java.util.*;
 
 action code {:
-	/* code inserted into CUP$actions class
-	 * it is used by the code embedded the grammar */
+    /* code inserted into CUP$actions class
+     * it is used by the code embedded the grammar */
 
-	/* hm is used to store and retrieve values of variables */
-	public HashMap hm = new HashMap();
-	/* var stores the used variable names, this is not necessary
-	 * but helpful to dump all the values at the end */
-	public LinkedList var = new LinkedList();
+    /* hm is used to store and retrieve values of variables */
+    public HashMap hm = new HashMap();
+    /* var stores the used variable names, this is not necessary
+     * but helpful to dump all the values at the end */
+    public LinkedList var = new LinkedList();
     /* ft is used to store and retrieve the functions */
-    //public HashMap ft = new HashMap();
+    public HashMap classtable = new HashMap();
     
     /* Added for assignment 3 */
     public SymbolTable st = new SymbolTable();
     //public FunctionTable funcTable = new FunctionTable();
     public Linker linker = new Linker();
     
-:}
+    :}
 
 parser code {:
 
-	/* this part is included in the parser class */
-	public static void main (String args[]) throws Exception{
-		new parser(new Yylex(System.in)).parse();
-	}
-:}
+    /* this part is included in the parser class */
+    public static void main (String args[]) throws Exception{
+	new parser(new Yylex(System.in)).parse();
+    }
+    :}
 
-terminal NOT; // Assignment 2 (mks62) added NOT
-terminal SEMI, PLUS, MINUS, TIMES, ASSIGN, LPAREN, RPAREN, LBRACKET, RBRACKET; // Assignment 2 (mwa29) added LBRACKET,RBRACKET
+terminal DOT;
+terminal NOT;
+terminal SEMI, PLUS, MINUS, TIMES, ASSIGN, LPAREN, RPAREN, LBRACKET, RBRACKET;
 terminal IF, THEN, ELSE, FI, WHILE, DO, OD, REPEAT, UNTIL, CONS, CAR, CDR, NULLP, INTP, LISTP, CONCAT;
-terminal PROC, END,RETURN;
+terminal CLASS, PROC, END,RETURN;
 terminal Integer NUMBER;
 terminal COMMA;
 terminal String ID;
@@ -40,116 +41,141 @@ non terminal Program program;
 non terminal StatementList statement_list;
 non terminal ParamList param_list;
 non terminal ExpressionList expr_list;
-non terminal Statement statement, assign_statement, if_statement, while_statement, repeat_statement, return_statement;
-non terminal Expr expr, term, factor, funcall;
-// Assignment 2 (mwa29)
+non terminal Statement statement, assign_statement, if_statement, while_statement, repeat_statement, return_statement, class_define_statement;
+non terminal Expr expr, term, factor, funcall, methodcall;
 non terminal List list;
 non terminal Sequence sequence;
 
 program ::= statement_list:list
-	    {: Program program = new Program(list);
-	       program.eval(hm);
-               program.dump(hm, var, st, linker);
-               // program.translate(st, funcTable);
-               // linker.printRAL("trans.out", st, funcTable);
-               // linker.link(st, funcTable);
-               // linker.printRAL("linked.out", st, funcTable);
-               // linker.printInitialMemory("initialmemory.out", st, funcTable);
-	     :};
+{: Program program = new Program(list);
+ program.eval(hm, classtable);
+ program.dump(hm, classtable, var, st, linker);
+ // program.translate(st, funcTable);
+ // linker.printRAL("trans.out", st, funcTable);
+ // linker.link(st, funcTable);
+ // linker.printRAL("linked.out", st, funcTable);
+ // linker.printInitialMemory("initialmemory.out", st, funcTable);
+ :};
 
-statement_list ::= statement:s
-		    {: RESULT = new StatementList(s); :}
-		  | statement:s SEMI statement_list:sl 
-		    {: /* insert a new statement at the end of the existing statement list */
-		       sl.insert(s); RESULT = sl; :};
+statement_list ::= statement:s SEMI
+{: RESULT = new StatementList(s); :}
+| statement:s SEMI statement_list:sl 
+{: /* insert a new statement at the end of the existing statement list */
+    sl.insert(s); RESULT = sl; :};
 
 statement ::= assign_statement:a
-	      {: RESULT = a; :}
-	    | if_statement:i
-	      {: RESULT = i; :}
-	    | while_statement:w
-	      {: RESULT = w; :}
-            | return_statement:rs
-              {: RESULT = rs; :}
-            | repeat_statement:r
-              {: RESULT = r; :};
+{: RESULT = a; :}
+| if_statement:i
+{: RESULT = i; :}
+| while_statement:w
+{: RESULT = w; :}
+| return_statement:rs
+{: RESULT = rs; :}
+| repeat_statement:r
+{: RESULT = r; :}
+| class_define_statement:c
+{: RESULT = c; :};
 
 assign_statement ::= ID:i ASSIGN expr:e
-		     {: RESULT = new AssignStatement(i,e); :};
+{: RESULT = new AssignStatement(i,e); :};
 
 if_statement ::= IF expr:e THEN statement_list:s1 ELSE statement_list:s2 FI
-		 {: RESULT = new IfStatement(e,s1,s2); :};
+{: RESULT = new IfStatement(e,s1,s2); :};
 
 while_statement ::= WHILE expr:e DO statement_list:s OD
-		 {: RESULT = new WhileStatement(e,s); :};
+{: RESULT = new WhileStatement(e,s); :};
 
 repeat_statement ::= REPEAT statement_list:sl UNTIL expr:e
-                 {: RESULT = new RepeatStatement(sl,e); :};
+{: RESULT = new RepeatStatement(sl,e); :};
 
 return_statement ::= RETURN expr:e
-                 {: RESULT = new ReturnStatement(e); :};
+{: RESULT = new ReturnStatement(e); :};
 
 
 param_list ::= ID:i COMMA param_list:pl
-                 {: RESULT = new ParamList(i,pl); :}
-                 | ID:i
-                 {: RESULT = new ParamList(i); :};
+{: RESULT = new ParamList(i,pl); :}
+| ID:i
+{: RESULT = new ParamList(i); :};
 
 expr ::= NOT LPAREN expr:e RPAREN
-	 {: RESULT = new Not(e); :}
-       | expr:e PLUS term:t
-	 {: RESULT = new Plus(e,t); :}
-       | expr:e MINUS term:t
-	 {: RESULT = new Minus(e,t); :}
-	   | CONS LPAREN expr:e COMMA expr:L RPAREN
-	 {: RESULT = new Cons(e,L); :}
-	   | CAR LPAREN expr:e RPAREN
-	 {: RESULT = new Car(e); :}
-	   | CDR LPAREN expr:e RPAREN
-	 {: RESULT = new Cdr(e); :}
-	   | NULLP LPAREN expr:e RPAREN
-	 {: RESULT = new Nullp(e); :}	 
-	   | INTP LPAREN expr:e RPAREN
-	 {: RESULT = new Intp(e); :}
-	   | LISTP LPAREN expr:e RPAREN
-	 {: RESULT = new Listp(e); :}
-	   | expr:list1 CONCAT factor:list2
-	 {: RESULT = new Concat(list1, list2); :}
-         | term:t
-	 {: RESULT = t; :}
-         | PROC LPAREN param_list:pl RPAREN statement_list:sl END
-	 {: RESULT = new Proc(pl,sl); :}
-	 	 | PROC LPAREN param_list:pl RPAREN statement_list:sl END LPAREN expr_list:el RPAREN
-	 {: RESULT = new UnnamedProc(pl,sl,el); :};
+{: RESULT = new Not(e); :}
+| expr:e PLUS term:t
+{: RESULT = new Plus(e,t); :}
+| expr:e MINUS term:t
+{: RESULT = new Minus(e,t); :}
+| CONS LPAREN expr:e COMMA expr:L RPAREN
+{: RESULT = new Cons(e,L); :}
+| CAR LPAREN expr:e RPAREN
+{: RESULT = new Car(e); :}
+| CDR LPAREN expr:e RPAREN
+{: RESULT = new Cdr(e); :}
+| NULLP LPAREN expr:e RPAREN
+{: RESULT = new Nullp(e); :}	 
+| INTP LPAREN expr:e RPAREN
+{: RESULT = new Intp(e); :}
+| LISTP LPAREN expr:e RPAREN
+{: RESULT = new Listp(e); :}
+| expr:list1 CONCAT factor:list2
+{: RESULT = new Concat(list1, list2); :}
+| term:t
+{: RESULT = t; :}
+| PROC LPAREN param_list:pl RPAREN statement_list:sl END
+{: RESULT = new Proc(pl,sl); :}
+| PROC LPAREN param_list:pl RPAREN statement_list:sl END LPAREN expr_list:el RPAREN
+{: RESULT = new UnnamedProc(pl,sl,el); :}
+| PROC LPAREN RPAREN statement_list:sl END
+{: RESULT = new Proc(new ParamList(),sl); :}
+| PROC LPAREN RPAREN statement_list:sl END LPAREN expr_list:el RPAREN
+{: RESULT = new UnnamedProc(new ParamList(),sl,el); :};
 
 term ::= term:t TIMES factor:f
-         {: RESULT = new Times(t,f); :}
-       | factor:f
-	 {: RESULT = f; :};
+{: RESULT = new Times(t,f); :}
+| factor:f
+{: RESULT = f; :};
 
 factor ::= LPAREN expr:e RPAREN
-	   {: RESULT = e; :}
-	 | NUMBER:n
-	   {: RESULT = new Number(n); :}
-	 | list:l
-	   {: RESULT = l; :}
-	 | ID:i
-	   {: RESULT = new Ident(i); :}
-     | funcall:fc
-       {: RESULT = fc; :};
+{: RESULT = e; :}
+| NUMBER:n
+{: RESULT = new Number(n); :}
+| list:l
+{: RESULT = l; :}
+| ID:i
+{: RESULT = new Ident(i); :}
+| funcall:fc
+{: RESULT = fc; :}
+| methodcall:mc
+{: RESULT = mc; :};
 
 funcall ::= ID:i LPAREN expr_list:el RPAREN
-            {: RESULT = new FunctionCall(i,el); :};
+{: RESULT = new FunctionCall(i,el); :}
+| ID:i LPAREN RPAREN
+{: RESULT = new FunctionCall(i, new ExpressionList()); :};
+
+methodcall ::= ID:i1 DOT ID:i2 LPAREN expr_list:el RPAREN
+{: RESULT = new MethodCall(i1,i2,el); :}
+| ID:i1 DOT ID:i2 LPAREN RPAREN
+{: RESULT = new MethodCall(i1,i2, new ExpressionList()); :};
+
 
 expr_list ::= expr:ex COMMA expr_list:el
-            {: RESULT = new ExpressionList(ex,el); :}
-            | expr:ex 
-            {: RESULT = new ExpressionList(ex);   :};
+{: RESULT = new ExpressionList(ex,el); :}
+| expr:ex 
+{: RESULT = new ExpressionList(ex);   :};
 
-// Assignment 2 (mwa29)
 list        ::= LBRACKET sequence:seq RBRACKET {: RESULT = new List(seq);   :}
-	      | LBRACKET RBRACKET              {: RESULT = new List();      :}
-              ;
+| LBRACKET RBRACKET              {: RESULT = new List();      :}
+;
 sequence    ::= expr:e COMMA sequence:seq      {: RESULT = new Sequence(seq,e); :}
-              | expr:e                         {: RESULT = new Sequence(e); :}
-              ;
+| expr:e                         {: RESULT = new Sequence(e); :}
+;
+
+class_define_statement ::= 
+CLASS ID:i LPAREN param_list:pl RPAREN statement_list:sl END
+{: RESULT = new KlassDefineStatement(i, pl, sl); :}
+| CLASS ID:i LPAREN param_list:pl RPAREN SEMI ID:p statement_list:sl END
+{: RESULT = new KlassDefineStatement(i, pl, sl, p); :}
+|CLASS ID:i LPAREN RPAREN statement_list:sl END
+{: RESULT = new KlassDefineStatement(i, new ParamList(), sl); :}
+| CLASS ID:i LPAREN RPAREN SEMI ID:p statement_list:sl END
+{: RESULT = new KlassDefineStatement(i, new ParamList(), sl, p); :}
+;
